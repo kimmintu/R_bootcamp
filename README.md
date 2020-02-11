@@ -3,10 +3,11 @@
 pls put the data source files in the folder bike-share-analysis/data
 
 Ref.
-Add user email in order to be able to commit
+
+1. Add user email in order to be able to commit
 https://help.github.com/en/github/setting-up-and-managing-your-github-user-account/setting-your-commit-email-address
 
-Create, clone, commit with Git Bash in Windows
+2. Create, clone, commit with Git Bash in Windows
 https://www.youtube.com/watch?v=hsHVGit53sg
 
 cd C:\location
