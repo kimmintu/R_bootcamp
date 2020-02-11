@@ -20,6 +20,8 @@ cd cloned_repository_folder
 
 git status
 
+git pull
+
 git add .
 
 git commit -m "comment message for commit action"
