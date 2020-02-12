@@ -39,13 +39,11 @@ library("Hmisc")
 # Load Data
 
 ```{r, include=FALSE}
-setwd("C:/Users/Andy Gubser/OneDrive - Hochschule Luzern/01 Studium/03 MSc Data Science/Master HS19/Wahlpflichtmodule/W.MSCIDS_RB01.H1901/Material/Assignment")
+setwd("./data")
 
-d.bike.raw = read_csv("bikeshare-analysis/NYC-CitiBike-2016.csv")
-
-
-colnames(d.bike)
-describe(d.bike)
+d.bike.raw = read_csv("NYC-CitiBike-2016.csv")
+colnames(d.bike.raw)
+# describe(d.bike.raw)
 
 ```
 
