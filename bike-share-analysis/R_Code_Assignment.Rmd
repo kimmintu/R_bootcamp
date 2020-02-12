@@ -111,10 +111,23 @@ end_plot2 <- ggplot() +
 ```
 
 
+# take a random sample for plotting
+
+```{r}
+describe(d.bike$month)
+length(d.bike)
+
+d.bike.sample = d.bike[sample(nrow(d.bike), round(length(d.bike)/10)), ]
+
+```
+
+df = data.frame(matrix(rnorm(20), nrow=10))
+d.bike
+
 
 ```{r}
 #our background map
-mad_map <- get_map(getbb("New York"),maptype = "toner-background", source="stamen")
+mad_map <- get_map(getbb("New York"))
 
 #final map
 ggmap(mad_map)+ 
@@ -128,10 +141,15 @@ ggmap(mad_map)+
         yend = end_station_latitude
         )
       )+
-  facet_grid(month) +
+  facet_grid(month ~ gender) +
   labs(x="",y="")
 
+# ggsave("bike_nyc", device = "pdf")
+
 levels(d.bike$month)
+
+# y-var: tripduration
+# x-var: wheather, gender, age
 
 
 ```
