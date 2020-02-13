@@ -1,6 +1,18 @@
 ---
-title: "R Notebook"
-output: html_notebook
+title: "Assignment R Bootcamp"
+author: "Tu Tran und Andy Gubser"
+date: /today
+output: 
+  html_document:
+    theme: flatly
+    toc: true
+    toc_depth: 4
+    toc_float: 
+      collapsed: true
+      smooth_scroll: true
+    number_sections: true
+    df_print: paged
+
 ---
 
 ```{r setup}
@@ -14,17 +26,26 @@ knitr::opts_chunk$set(echo=TRUE)
 ```
 
 
-# take a random sample for plotting
+# Clarify question
 
-```{r}
-describe(d.bike$month)
-length(d.bike)
+This project analysis the usage of sharing bikes in New York City in 2016 regarding the following properties: 
+- Who is using the bikes?
+  - gender (m/f) **
+  - age (recode from birth year =  2016-x) 
+- When are the bikes used
+  - time (day/night)
+  - date (weekdays/weekend)
+  - month (summer/winter) **
+  - weather **
+  
+** Andy tries to include these into the visualisation
 
-d.bike.sample = d.bike[base::sample(
-  x=1:nrow(d.bike), round(nrow(d.bike)/10)), ]
+- Who is using the bikes for the longest rides?
 
-```
+# Get data
+-- # Data prep
 
+# Data visualisation
 
 ```{r}
 #our background map
@@ -153,18 +174,20 @@ d.bike
 
 
 
+# Fit models
+
+
+
+
+# Interpretation
+
+
+
+
 
 ```{r}
-ggplot() + 
-  + geom_pi
-  gender, d.bikes
-```
-
-
-
-```{r}
-sessionInfo()
-{miniCRAN} pkgDep()
+# sessionInfo()
+# {miniCRAN} pkgDep()
 
 ```
 
