@@ -1,0 +1,184 @@
+---
+title: "R Bootcamp Assignment"
+author: "Tu Tran and Andy Gubser"
+date: \today
+output: 
+  html_document:
+    theme: flatly
+    toc: true
+    toc_depth: 4
+    toc_float: 
+      collapsed: true
+      smooth_scroll: true
+    number_sections: true
+    df_print: paged
+---
+
+
+```{r setup, include=FALSE, echo=TRUE, eval=TRUE}
+# install.packages("tinytex")
+# tinytex::install_tinytex()
+
+knitr::opts_chunk$set(echo=TRUE)
+
+
+
+```
+
+
+# take a random sample for plotting
+
+```{r}
+describe(d.bike$month)
+length(d.bike)
+
+d.bike.sample = d.bike[base::sample(
+  x=1:nrow(d.bike), round(nrow(d.bike)/10)), ]
+
+```
+
+
+```{r}
+#our background map
+# mad_map <- get_map(getbb("New York"),maptype = "toner-background", source="stamen")
+
+min_lon <- min(d.bike$start_station_longitude, d.bike$end_station_longitude)
+max_lon <- max(d.bike$start_station_longitude, d.bike$end_station_longitude)
+min_lat <- min(d.bike$start_station_latitude, d.bike$end_station_latitude)
+max_lat <- max(d.bike$start_station_latitude, d.bike$end_station_latitude)
+mad_map <- (map <- get_map(c(left = min_lon, bottom = min_lat, right = max_lon, top = max_lat)))
+
+#final map
+ggmap(mad_map)+ 
+  
+    geom_leg(data=d.bike.sample,
+      color = gender, 
+      alpha=0.1,
+      
+      aes(
+        x = start_station_longitude, 
+        y = start_station_latitude, 
+        xend = end_station_longitude, 
+        yend = end_station_latitude
+        )
+      )+
+  
+  facet_grid(month ~ gender) +
+  theme(
+    axis.title.x=element_blank(),
+    axis.text.x=element_blank(),
+    axis.ticks.x=element_blank(),
+        
+    axis.title.y=element_blank(),
+    axis.text.y=element_blank(),
+    axis.ticks.y=element_blank()
+    ) + 
+
+  labs(x="",y="")
+
+# ggsave("bike_nyc", device = "pdf")
+
+# y-var: tripduration
+# x-var: wheather, gender, age, month, time
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+
+ggmap(ggmap, source="osm") + 
+  geom_leg(
+    aes(x = start_station_longitude, 
+        y = start_station_latitude, 
+        xend = end_station_longitude, 
+        yend = end_station_latitude,
+        colour = "blue", alpha=0.0001
+    )
+  )
+
+
+nyc_map <- fortify(gSimplify(nyc, 0.05))
+
+gg <- ggplot()
+gg <- gg + geom_map(data=nyc_map, map=nyc_map,
+                    aes(x=long, y=lat, map_id=id),
+                    color="black", fill="white", size=0.25)
+gg <- gg + coord_equal() 
+gg <- gg + theme_map()
+gg
+
+
+
+```
+
+
+```{r}
+colnames(d.bike)
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+# Set value for the minZoom and maxZoom settings.
+leaflet(options = leafletOptions(minZoom = 0, maxZoom = 18))
+
+m <- leaflet() %>%
+  addTiles() %>%  # Add default OpenStreetMap map tiles
+  addMarkers(lng=d.bike$start_station_longitude, 
+             lat=d.bike$start_station_latitude, 
+             popup="The birthplace of R")
+m  # Print the map
+
+```
+
+d.bike
+
+
+
+
+```{r}
+ggplot() + 
+  + geom_pi
+  gender, d.bikes
+```
+
+
+
+```{r}
+sessionInfo()
+{miniCRAN} pkgDep()
+
+```
+
+
+# https://rstudio.github.io/leaflet/
