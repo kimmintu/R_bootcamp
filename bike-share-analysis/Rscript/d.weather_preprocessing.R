@@ -33,5 +33,5 @@ d.bike_weather <- base::merge(x=d.bike, y=d.weather,
 
 colnames(d.bike_weather)
 
-saveRDS(d.bike_weather, file = "d.bike_weather.rds")
+saveRDS(d.bike_weather, file = "../data/d.bike_weather.rds")
 
