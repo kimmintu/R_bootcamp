@@ -19,7 +19,7 @@ output:
 
 ## Purpose
 
-With this project we analyse the typical subscriber of bike sharing services in New York City. In particular, we evaluate who took the longest trips. Therefore, we control for their age, gender, and if they rode the bikes on weekdays, during daytimes or nighttimes, and during what weather conditions. 
+With this project we analyse the typical subscriber of bike sharing services in New York City. In particular, we evaluate who took the longest trips. Therefore, we control for their age, gender and if they rode the bikes on weekdays, during daytimes or nighttimes, and during what weather conditions. 
 
 <!-- in 2016 regarding the following properties:  -->
 <!-- - Who is using the bikes? -->
@@ -35,13 +35,12 @@ With this project we analyse the typical subscriber of bike sharing services in 
 ## Methodology
 The analysis bases on two datasets from Kaggle: the bikeshare dataset for New York City in 2016 [^1 https://www.kaggle.com/samratp/bikeshare-analysis#NYC-CitiBike-2016.csv] and the corresponding weather dataset [^2 https://www.kaggle.com/mathijs/weather-data-in-new-york-city-2016]. 
 
+After data preperation, we provide an graphical analysis to show which user is doing the longest trips. Then, we fit a linear model to analyse our research question followed by a random forest model. 
 
 
 ## Results
 Our analysis shows ...
 
-
-## Suggested next steps
 
 
 # Setup
