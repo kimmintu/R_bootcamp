@@ -43,7 +43,7 @@ After data preparation, we provide an graphical analysis to approach the researc
 rm(list = ls(all.names = TRUE))
 gc()
 library(checkpoint)
-checkpoint(snapshotDate = "2020-12-29")
+#checkpoint(snapshotDate = "2099-12-29")
 
 knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
 knitr::opts_chunk$set(echo=TRUE)
@@ -104,28 +104,6 @@ ggplot(data = d.bike_weather, aes(y = tripduration, x = age, color=gender))+
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ```{r, include=FALSE, echo=FALSE}
 # get background map
 min_lon <- min(d.bike_weather$start_station_longitude, d.bike_weather$end_station_longitude)
@@ -177,20 +155,6 @@ d.bike_weather_sample = d.bike_weather[
 ```
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ```{r}
 # Set value for the minZoom and maxZoom settings.
 #leaflet(options = leafletOptions(minZoom = 0, maxZoom = 18))
@@ -207,7 +171,7 @@ d.bike_weather_sample = d.bike_weather[
 
 ```{r}
 
-
+colnames(d.bike_weather)
 
 
 ```
