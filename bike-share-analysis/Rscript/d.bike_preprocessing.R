@@ -18,10 +18,9 @@ library("Hmisc")
 ###### LOAD DATA ######
 # getwd()
 # setwd("C:/Users/Andy Gubser/OneDrive - Hochschule Luzern/01 Studium/03 MSc Data Science/Master HS19/Wahlpflichtmodule/W.MSCIDS_RB01.H1901/Assignment/R_bootcamp/bike-share-analysis/Rscript")
-d.bike.raw = read_csv("../data/NYC-CitiBike-2016.csv")
+d.bike.raw = read_csv("./data/NYC-CitiBike-2016.csv")
 colnames(d.bike.raw)
 # describe(d.bike.raw)
-
 
 ###### CONVERT DATA ######
 d.bike <- d.bike.raw %>% select_all(snakecase::to_snake_case)
@@ -101,5 +100,7 @@ summary(d.bike$usertype)
 ###### FILTER SUBSCRIBERS ######
 d.bike <- filter(d.bike, usertype == "Subscriber")
 
+summary(d.bike)
 
-saveRDS(d.bike, file = "../data/d.bike.prepared.rds")
+
+saveRDS(d.bike, file = "./data/d.bike.prepared.rds")

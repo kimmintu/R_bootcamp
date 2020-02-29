@@ -62,17 +62,18 @@ set.seed(19)
 ## Library Import
 
 ```{r importLibraries, include=FALSE}
-list.of.packages <- c("installr", "Hmisc", "ggmap", "tidyverse")
+list.of.packages <- c("installr", "Hmisc", "ggmap", "tidyverse", "viridis", "leaflet")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
+for (p in list.of.packages){
+  library(p, character.only = TRUE)
+}
 
 ```
 
 # Data Import
 
 ```{r dataImport, include=FALSE, echo=FALSE, }
-setwd("C:\\Users\\Andy Gubser\\OneDrive - Hochschule Luzern\\01 Studium\\03 MSc Data Science\\Master HS19\\Wahlpflichtmodule\\W.MSCIDS_RB01.H1901\\Assignment\\R_bootcamp\\bike-share-analysis\\Rscript")
-
 # # preprocess bike data
 # source("./d.bike_preprocessing.R")
 
@@ -97,7 +98,6 @@ The parameters in the bike dataset include data about the rider such as usertype
 
 ```{r}
 dim(d.bike_weather)
-len(d.bike_weather)
 colnames(d.bike_weather)
 ```
 
@@ -159,33 +159,33 @@ d.bike_weather_sample = d.bike_weather[
 
 ```{r}
 #final map
-ggmap(mad_map) + 
-  geom_leg(
-    data=d.bike_weather_sample,
-      # color = factor(gender), 
-      alpha=0.1,
-      aes(
-        color = age_corr,
-        x = start_station_longitude, 
-        y = start_station_latitude, 
-        xend = end_station_longitude, 
-        yend = end_station_latitude
-        )
-      )+
-  labs(x="",y="") +
-  facet_grid(month ~ gender) +
-  theme(
-    axis.title.x=element_blank(),
-    axis.text.x=element_blank(),
-    axis.ticks.x=element_blank(),
+#ggmap(mad_map) + 
+#  geom_leg(
+#    data=d.bike_weather_sample,
+#      # color = factor(gender), 
+#      alpha=0.1,
+#      aes(
+#        color = age_corr,
+#        x = start_station_longitude, 
+#        y = start_station_latitude, 
+#        xend = end_station_longitude, 
+#        yend = end_station_latitude
+#        )
+#      )+
+#  labs(x="",y="") +
+#  facet_grid(month ~ gender) +
+#  theme(
+#    axis.title.x=element_blank(),
+#    axis.text.x=element_blank(),
+#    axis.ticks.x=element_blank(),
         
-    axis.title.y=element_blank(),
-    axis.text.y=element_blank(),
-    axis.ticks.y=element_blank()
-    ) + 
-  scale_color_viridis(option = "magma")
+#    axis.title.y=element_blank(),
+#    axis.text.y=element_blank(),
+#    axis.ticks.y=element_blank()
+#    ) + 
+#  scale_color_viridis(option = "magma")
 
-ggsave("map_age_gender_month.pdf", device = "pdf")
+#ggsave("map_age_gender_month.pdf", device = "pdf")
 ```
 
 
@@ -244,18 +244,24 @@ colnames(d.bike_weather)
 
 ```{r}
 # Set value for the minZoom and maxZoom settings.
-leaflet(options = leafletOptions(minZoom = 0, maxZoom = 18))
+#leaflet(options = leafletOptions(minZoom = 0, maxZoom = 18))
 
-m <- leaflet() %>%
-  addTiles() %>%  # Add default OpenStreetMap map tiles
-  addMarkers(lng=d.bike_weather$start_station_longitude, 
-             lat=d.bike_weather$start_station_latitude, 
-             popup="The birthplace of R")
-m  # Print the map
+#m <- leaflet() %>%
+#  addTiles() %>%  # Add default OpenStreetMap map tiles
+#  addMarkers(lng=d.bike_weather$start_station_longitude, 
+#             lat=d.bike_weather$start_station_latitude, 
+#             popup="The birthplace of R")
+#m  # Print the map
 
 ```
 
 
+```{r}
+
+
+
+
+```
 
 
 # Fit models

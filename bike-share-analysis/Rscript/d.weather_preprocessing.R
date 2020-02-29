@@ -15,10 +15,10 @@ library("lubridate")
 library("Hmisc")
 
 ###### LOAD DATA ######
-d.bike <- readRDS("../data/d.bike.prepared.rds")
+d.bike <- readRDS("./data/d.bike.prepared.rds")
 
 # setwd("C:/Users/Andy Gubser/OneDrive - Hochschule Luzern/01 Studium/03 MSc Data Science/Master HS19/Wahlpflichtmodule/W.MSCIDS_RB01.H1901/Assignment/R_bootcamp/bike-share-analysis/Rscript")
-d.weather.raw <- read_csv("../data/weather_nyc_2016.csv")
+d.weather.raw <- read_csv("./data/weather_nyc_2016.csv")
 colnames(d.weather.raw)
 describe(d.weather.raw)
 
@@ -39,5 +39,5 @@ d.bike_weather <- base::merge(x=d.bike, y=d.weather,
 
 colnames(d.bike_weather)
 
-saveRDS(d.bike_weather, file = "../data/d.bike_weather.rds")
+saveRDS(d.bike_weather, file = "./data/d.bike_weather.rds")
 
