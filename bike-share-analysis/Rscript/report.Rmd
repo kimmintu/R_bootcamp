@@ -159,27 +159,7 @@ d.bike_weather_sample = d.bike_weather[
 
 ```{r}
 #final map
-<<<<<<< HEAD
-ggmap(mad_map) + 
-  geom_leg(
-    data=d.bike_weather_sample,
-      # color = factor(gender), 
-      alpha=0.1,
-      aes(
-        color = age_capped,
-        x = start_station_longitude, 
-        y = start_station_latitude, 
-        xend = end_station_longitude, 
-        yend = end_station_latitude
-        )
-      )+
-  labs(x="",y="") +
-  facet_grid(month ~ gender) +
-  theme(
-    axis.title.x=element_blank(),
-    axis.text.x=element_blank(),
-    axis.ticks.x=element_blank(),
-=======
+
 #ggmap(mad_map) + 
 #  geom_leg(
 #    data=d.bike_weather_sample,
@@ -199,8 +179,6 @@ ggmap(mad_map) +
 #    axis.title.x=element_blank(),
 #    axis.text.x=element_blank(),
 #    axis.ticks.x=element_blank(),
->>>>>>> 547c5ec95c8bc1f6d6c60f891b2a1e076a7b5465
-        
 #    axis.title.y=element_blank(),
 #    axis.text.y=element_blank(),
 #    axis.ticks.y=element_blank()

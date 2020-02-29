@@ -18,7 +18,6 @@ library("Hmisc")
 d.bike <- readRDS("./data/d.bike.prepared.rds")
 colnames(d.bike)
 
-# setwd("C:/Users/Andy Gubser/OneDrive - Hochschule Luzern/01 Studium/03 MSc Data Science/Master HS19/Wahlpflichtmodule/W.MSCIDS_RB01.H1901/Assignment/R_bootcamp/bike-share-analysis/Rscript")
 d.weather.raw <- read_csv("./data/weather_nyc_2016.csv")
 colnames(d.weather.raw)
 describe(d.weather.raw)
