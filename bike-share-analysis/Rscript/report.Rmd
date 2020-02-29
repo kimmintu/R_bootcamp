@@ -71,12 +71,12 @@ for (p in list.of.packages){library(p, character.only = TRUE)}
 # # preprocess weather data and merge with preprocessed bike data
 # source("./d.weather_preprocessing.R")
 
-d.bike_weather <- readRDS("../data/d.bike_weather.rds")
+d.bike_weather <- readRDS("./data/d.bike_weather.rds")
 
 colnames(d.bike_weather)
 summary(d.bike_weather)
 dim(d.bike_weather)
-len(d.bike_weather)
+length(d.bike_weather)
 
 ```
 
@@ -94,9 +94,43 @@ The weather data set includes 366 observations and the 7 variables maximum, mini
 
 
 ```{r}
-ggplot(data = d.bike_weather, aes(y = tripduration, x = age, color=gender))+ 
+colnames(d.bike_weather)
+
+# tripduration
+hist(d.bike_weather$tripduration)
+hist(log(d.bike_weather$tripduration))
+
+# station id
+hist(as.numeric(d.bike_weather$start_station_id))
+hist(as.numeric(d.bike_weather$end_station_id))
+
+# birth_year
+describe(d.bike_weather$birth_year)
+hist(as.numeric(d.bike_weather$age_capped))
+
+# weather
+hist(d.bike_weather$maximum_temperature_celsius)
+hist(d.bike_weather$minimum_temperature_celsius)
+hist(d.bike_weather$average_temperature_celsius)
+
+describe(d.bike_weather$precipitation)
+describe(d.bike_weather$snow_fall)
+describe(d.bike_weather$snow_depth)
+
+typeof(d.bike_weather$snow_depth)
+
+
+```
+
+
+```{r}
+
+
+ggplot(data = d.bike_weather, aes(y = log(tripduration), x = age, color=gender))+ 
     geom_point()
 #   facet_grid(month ~ gender) +
+
+12500/3600
 
 ```
 
@@ -151,7 +185,7 @@ ggmap(mad_map) +
       # color = factor(gender), 
       alpha=0.1,
       aes(
-        color = age_corr,
+        color = age_capped,
         x = start_station_longitude, 
         y = start_station_latitude, 
         xend = end_station_longitude, 

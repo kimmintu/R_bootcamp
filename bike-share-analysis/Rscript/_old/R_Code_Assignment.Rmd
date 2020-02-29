@@ -8,15 +8,6 @@ output: html_notebook
 # Install and load packages
 
 ```{r, include=FALSE}
-# remove all objects loaded and clear memory
-rm(list = ls(all.names = TRUE))
-gc()
-
-# library(checkpoint)
-# checkpoint(snapshotDate = "2020-01-01")
-
-
-
 # install.packages("ggmap")
 # install.packages("leaflet")
 # install.packages("Hmisc")
@@ -27,16 +18,12 @@ if(!require("osmdata")) install.packages("osmdata")
 if(!require("tidyverse")) install.packages("tidyverse")
 if(!require("sf")) install.packages("sf")
 if(!require("ggmap")) install.packages("ggmap")
-# citation("ggmap")
-
 
 #load packages
 library(tidyverse)
 library(osmdata)
 library(sf)
 library(ggmap)
-
-library("tidyverse")
 library("lubridate")
 #library("leaflet")
 library("Hmisc")
@@ -50,15 +37,16 @@ library("Hmisc")
 # Load Data
 
 ```{r, include=FALSE}
-getwd()
-d.bike.raw = read_csv("data/NYC-CitiBike-2016.csv")
+setwd("./data")
+
+d.bike.raw = read_csv("NYC-CitiBike-2016.csv")
 colnames(d.bike.raw)
 # describe(d.bike.raw)
 
 ```
 
 
-# Prepare Data
+# Preprocess Data
 
 Convert Data to correct data type. Create a variable month that indicate the month of starttime. 
 
@@ -67,8 +55,8 @@ Convert Data to correct data type. Create a variable month that indicate the mon
 d.bike <- d.bike.raw %>% select_all(snakecase::to_snake_case)
 
 d.bike <- d.bike %>%
-  mutate(starttime = mdy_hms(starttime),
-         stoptime = mdy_hms(stoptime),
+  mutate(starttime = dmy_hms(starttime),
+         stoptime = dmy_hms(stoptime),
          gender = factor(gender),
          start_station_id = factor(start_station_id),
          start_station_name = factor(start_station_name),
@@ -79,22 +67,14 @@ d.bike <- d.bike %>%
          birth_year = factor(birth_year),
          month = factor(month(starttime))
          )
+head(d.bike)
 
-
-
-d.bike$gender <- factor(d.bike$gender, levels = c(0,1,2), labels = c("X", "M", "F")) 
-
-describe(d.bike$month)
-d.bike$month <- factor(d.bike$month, levels = seq(1,12,1), 
-                       labels = c("Jan", "Feb", "Mar", "Apr", "Mai",
-                                  "Jun", "Jul", "Aug", "Sep", "Oct", 
-                                  "Nov", "Dec")) 
 
                   #         distance = (start_station_longitude - end_station_latitude)^2 / (start_station_latitude - end_station_latitude)^2)
 #        distance = distm(c(start_station_longitude, end_station_latitude), c(start_station_latitude, end_station_latitude), fun = distHaversine)
 
+levels(d.bike$month)
 
-saveRDS(d.bike, file="d.bike.data.prep.RDS")
 
 ```
 
@@ -114,8 +94,7 @@ end_plot <- ggplot() +
 
 d.bike <- filter(d.bike, 
                   start_station_latitude > 40.6,
-                  end_station_latitude > 40.6,
-                  usertype == "Subscriber"
+                  end_station_latitude > 40.6
                   )
 
 start_plot2 <- ggplot() +
@@ -127,7 +106,6 @@ end_plot2 <- ggplot() +
   geom_point(
     aes(x=end_station_latitude, y=end_station_longitude), data=d.bike)
 # end_plot2
-
 ```
 
 
@@ -137,29 +115,23 @@ end_plot2 <- ggplot() +
 describe(d.bike$month)
 length(d.bike)
 
-d.bike.sample = d.bike[base::sample(
-  x=1:nrow(d.bike), round(nrow(d.bike)/10)), ]
+d.bike.sample = d.bike[sample(nrow(d.bike), round(length(d.bike)/10)), ]
 
 ```
+
+df = data.frame(matrix(rnorm(20), nrow=10))
+d.bike
 
 
 ```{r}
 #our background map
-# mad_map <- get_map(getbb("New York"),maptype = "toner-background", source="stamen")
-
-min_lon <- min(d.bike$start_station_longitude, d.bike$end_station_longitude)
-max_lon <- max(d.bike$start_station_longitude, d.bike$end_station_longitude)
-min_lat <- min(d.bike$start_station_latitude, d.bike$end_station_latitude)
-max_lat <- max(d.bike$start_station_latitude, d.bike$end_station_latitude)
-mad_map <- (map <- get_map(c(left = min_lon, bottom = min_lat, right = max_lon, top = max_lat)))
+mad_map <- get_map(getbb("New York"))
 
 #final map
 ggmap(mad_map)+ 
-  
-    geom_leg(data=d.bike.sample,
-      color = gender, 
-      alpha=0.1,
-      
+    geom_leg(data=d.bike,
+      color = "red", 
+      alpha=0.01, 
       aes(
         x = start_station_longitude, 
         y = start_station_latitude, 
@@ -167,25 +139,15 @@ ggmap(mad_map)+
         yend = end_station_latitude
         )
       )+
-  
   facet_grid(month ~ gender) +
-  theme(
-    axis.title.x=element_blank(),
-    axis.text.x=element_blank(),
-    axis.ticks.x=element_blank(),
-        
-    axis.title.y=element_blank(),
-    axis.text.y=element_blank(),
-    axis.ticks.y=element_blank()
-    ) + 
-
   labs(x="",y="")
 
 # ggsave("bike_nyc", device = "pdf")
 
-# y-var: tripduration
-# x-var: wheather, gender, age, month, time
+levels(d.bike$month)
 
+# y-var: tripduration
+# x-var: wheather, gender, age
 
 
 ```
@@ -204,6 +166,8 @@ ggmap(mad_map)+
 
 
 ```{r}
+library(ggmap)
+# citation("ggmap")
 
 ggmap(ggmap, source="osm") + 
   geom_leg(

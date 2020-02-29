@@ -15,18 +15,46 @@ library("lubridate")
 library("Hmisc")
 
 ###### LOAD DATA ######
-d.bike <- readRDS("../data/d.bike.prepared.rds")
+d.bike <- readRDS("./data/d.bike.prepared.rds")
 colnames(d.bike)
 
 # setwd("C:/Users/Andy Gubser/OneDrive - Hochschule Luzern/01 Studium/03 MSc Data Science/Master HS19/Wahlpflichtmodule/W.MSCIDS_RB01.H1901/Assignment/R_bootcamp/bike-share-analysis/Rscript")
-d.weather.raw <- read_csv("../data/weather_nyc_2016.csv")
+d.weather.raw <- read_csv("./data/weather_nyc_2016.csv")
 colnames(d.weather.raw)
 describe(d.weather.raw)
-
+dim(d.weather.raw)
 ###### CONVERT DATA ######
 d.weather <- d.weather.raw %>% select_all(snakecase::to_snake_case)
 colnames(d.weather)
 describe(d.weather)
+
+farenheit_to_celsius <- function(variable_in_farenheit){
+  return(as.numeric(5/9*(variable_in_farenheit-32)))
+}
+
+colnames(d.weather)
+for (col in d.weather){
+  print(class(col))
+}
+
+
+d.weather <- d.weather %>%
+  mutate(
+    date = as.Date(date),
+    weekday = weekdays(as.Date(date)),
+    minimum_temperature_celsius = farenheit_to_celsius(minimum_temperature),
+    maximum_temperature_celsius = farenheit_to_celsius(maximum_temperature),
+    average_temperature_celsis = farenheit_to_celsius(average_temperature),
+    precipitation = as.numeric(precipitation),
+    snow_fall = as.numeric(snow_fall),
+    snow_depth = as.numeric(snow_depth)
+  )
+
+
+colnames(d.weather)
+for (col in d.weather){
+  print(class(col))
+}
 
 ###### CREATE DATE ######
 d.weather$date <- dmy(d.weather$date)
@@ -40,5 +68,5 @@ d.bike_weather <- base::merge(x=d.bike, y=d.weather,
 
 colnames(d.bike_weather)
 
-saveRDS(d.bike_weather, file = "../data/d.bike_weather.rds")
+saveRDS(d.bike_weather, file = "./data/d.bike_weather.rds")
 
