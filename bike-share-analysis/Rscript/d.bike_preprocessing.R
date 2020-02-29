@@ -20,6 +20,7 @@ library("Hmisc")
 # setwd("C:/Users/Andy Gubser/OneDrive - Hochschule Luzern/01 Studium/03 MSc Data Science/Master HS19/Wahlpflichtmodule/W.MSCIDS_RB01.H1901/Assignment/R_bootcamp/bike-share-analysis/Rscript")
 d.bike.raw = read_csv("./data/NYC-CitiBike-2016.csv")
 colnames(d.bike.raw)
+dim(d.bike.raw)
 # describe(d.bike.raw)
 
 ###### CONVERT DATA ######
@@ -42,7 +43,7 @@ d.bike <- d.bike %>%
          bikeid = factor(bikeid),
          usertype = factor(usertype),
          age = 2016-as.numeric(birth_year),
-         age_category = factor(pmin(age, 70)), 
+         age_capped = pmin(age, 70), 
          age_group = cut(age, breaks = 20),
          
          month = factor(month(starttime), 
@@ -54,9 +55,9 @@ d.bike <- d.bike %>%
          )
 
 summary(d.bike$age)
-summary(as.numeric(d.bike$age_category))
+summary(as.numeric(d.bike$age_cappedegory))
 hist(d.bike$age)
-hist(as.numeric(d.bike$age_category))
+hist(as.numeric(d.bike$age_cappedegory))
 # describe(d.bike$startdate)
 
 
@@ -109,4 +110,10 @@ d.bike <- filter(d.bike,
 
 summary(d.bike$gender)
 
+<<<<<<< HEAD
+
+
 saveRDS(d.bike, file = "./data/d.bike.prepared.rds")
+=======
+saveRDS(d.bike, file = "./data/d.bike.prepared.rds")
+>>>>>>> 547c5ec95c8bc1f6d6c60f891b2a1e076a7b5465

@@ -22,11 +22,39 @@ colnames(d.bike)
 d.weather.raw <- read_csv("./data/weather_nyc_2016.csv")
 colnames(d.weather.raw)
 describe(d.weather.raw)
-
+dim(d.weather.raw)
 ###### CONVERT DATA ######
 d.weather <- d.weather.raw %>% select_all(snakecase::to_snake_case)
 colnames(d.weather)
 describe(d.weather)
+
+farenheit_to_celsius <- function(variable_in_farenheit){
+  return(as.numeric(5/9*(variable_in_farenheit-32)))
+}
+
+colnames(d.weather)
+for (col in d.weather){
+  print(class(col))
+}
+
+
+d.weather <- d.weather %>%
+  mutate(
+    date = as.Date(date),
+    weekday = weekdays(as.Date(date)),
+    minimum_temperature_celsius = farenheit_to_celsius(minimum_temperature),
+    maximum_temperature_celsius = farenheit_to_celsius(maximum_temperature),
+    average_temperature_celsis = farenheit_to_celsius(average_temperature),
+    precipitation = as.numeric(precipitation),
+    snow_fall = as.numeric(snow_fall),
+    snow_depth = as.numeric(snow_depth)
+  )
+
+
+colnames(d.weather)
+for (col in d.weather){
+  print(class(col))
+}
 
 ###### CREATE DATE ######
 d.weather$date <- dmy(d.weather$date)
