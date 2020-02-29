@@ -29,7 +29,7 @@ d.bike <- d.bike %>%
   mutate(starttime = mdy_hms(starttime),
          stoptime = mdy_hms(stoptime),
          startdate = date(starttime), # YYYY-MM-DD
-         # startdate = as.Date(startdate),
+         startdate = as.Date(startdate),
          tripduration_min = tripduration/60,
          gender = factor(gender, 
                          levels = c(0,1,2), 
@@ -41,10 +41,9 @@ d.bike <- d.bike %>%
          end_station_name = factor(end_station_name),
          bikeid = factor(bikeid),
          usertype = factor(usertype),
-         age = 2016-birth_year,
-         age_corr = pmin(age, 70), 
+         age = 2016-as.numeric(birth_year),
+         age_category = factor(pmin(age, 70)), 
          age_group = cut(age, breaks = 20),
-         
          
          month = factor(month(starttime), 
                         levels = seq(1,12,1), 
@@ -54,8 +53,10 @@ d.bike <- d.bike %>%
                                    "Oct", "Nov", "Dec"))
          )
 
+summary(d.bike$age)
+summary(as.numeric(d.bike$age_category))
 hist(d.bike$age)
-hist(d.bike$age_corr)
+hist(as.numeric(d.bike$age_category))
 # describe(d.bike$startdate)
 
 
@@ -100,7 +101,12 @@ summary(d.bike$usertype)
 ###### FILTER SUBSCRIBERS ######
 d.bike <- filter(d.bike, usertype == "Subscriber")
 
-summary(d.bike)
+###### EXCLUDE UNKNOWN GENDER ######
+summary(d.bike$gender)
+d.bike <- filter(d.bike, 
+                 gender == "F" | gender == "M") %>%
+  droplevels()
 
+summary(d.bike$gender)
 
 saveRDS(d.bike, file = "./data/d.bike.prepared.rds")
