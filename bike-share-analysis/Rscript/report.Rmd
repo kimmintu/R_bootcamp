@@ -80,6 +80,8 @@ summary(d.bike_weather)
 dim(d.bike_weather)
 length(d.bike_weather)
 
+d.bike_weather$date
+
 ```
 
 

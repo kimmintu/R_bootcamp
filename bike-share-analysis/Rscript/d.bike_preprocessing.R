@@ -110,10 +110,6 @@ d.bike <- filter(d.bike,
 
 summary(d.bike$gender)
 
-<<<<<<< HEAD
 
 
 saveRDS(d.bike, file = "./data/d.bike.prepared.rds")
-=======
-saveRDS(d.bike, file = "./data/d.bike.prepared.rds")
->>>>>>> 547c5ec95c8bc1f6d6c60f891b2a1e076a7b5465
