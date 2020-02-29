@@ -1,5 +1,10 @@
 # Install and load packages
 
+# remove all objects loaded and clear memory
+rm(list = ls(all.names = TRUE))
+gc()
+
+
 # library(checkpoint)
 # checkpoint(snapshotDate = "2020-01-01")
 
@@ -15,7 +20,7 @@ library("Hmisc")
 # setwd("C:/Users/Andy Gubser/OneDrive - Hochschule Luzern/01 Studium/03 MSc Data Science/Master HS19/Wahlpflichtmodule/W.MSCIDS_RB01.H1901/Assignment/R_bootcamp/bike-share-analysis/Rscript")
 d.bike.raw = read_csv("../data/NYC-CitiBike-2016.csv")
 colnames(d.bike.raw)
-describe(d.bike.raw)
+# describe(d.bike.raw)
 
 
 ###### CONVERT DATA ######
@@ -26,6 +31,7 @@ d.bike <- d.bike %>%
          stoptime = mdy_hms(stoptime),
          startdate = date(starttime), # YYYY-MM-DD
          # startdate = as.Date(startdate),
+         tripduration_min = tripduration/60,
          gender = factor(gender, 
                          levels = c(0,1,2), 
                          labels = c("X", "M", "F")
@@ -36,7 +42,11 @@ d.bike <- d.bike %>%
          end_station_name = factor(end_station_name),
          bikeid = factor(bikeid),
          usertype = factor(usertype),
-         birth_year = factor(birth_year),
+         age = 2016-birth_year,
+         age_corr = pmin(age, 70), 
+         age_group = cut(age, breaks = 20),
+         
+         
          month = factor(month(starttime), 
                         levels = seq(1,12,1), 
                         labels = c("Jan", "Feb", "Mar", 
@@ -45,11 +55,22 @@ d.bike <- d.bike %>%
                                    "Oct", "Nov", "Dec"))
          )
 
-describe(d.bike$startdate)
+hist(d.bike$age)
+hist(d.bike$age_corr)
+# describe(d.bike$startdate)
 
 
+###### DROP OUTLIERS######
 
-###### DROP OUTLIERS IN COORDINATES ######
+
+d.bike <- filter(d.bike, 
+                 tripduration_min < 200
+                   )
+hist(d.bike$tripduration_min)
+
+table(d.bike$tripduration)
+
+# coordinates
 # start_plot <- ggplot() +
 #   geom_point(
 #     aes(x=start_station_latitude, y=start_station_longitude), data=d.bike)
@@ -75,11 +96,10 @@ d.bike <- filter(d.bike,
 #     aes(x=end_station_latitude, y=end_station_longitude), data=d.bike)
 # # end_plot2
 
-###### FILTER SUBSCRIBERS ######
-d.bike <- filter(d.bike,
-                 usertype == "Subscriber"
-                 )
+summary(d.bike$usertype)
 
+###### FILTER SUBSCRIBERS ######
+d.bike <- filter(d.bike, usertype == "Subscriber")
 
 
 saveRDS(d.bike, file = "../data/d.bike.prepared.rds")

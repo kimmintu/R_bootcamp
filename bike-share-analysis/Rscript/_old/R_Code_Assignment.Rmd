@@ -8,8 +8,12 @@ output: html_notebook
 # Install and load packages
 
 ```{r, include=FALSE}
-library(checkpoint)
-checkpoint(snapshotDate = "2020-01-01")
+# remove all objects loaded and clear memory
+rm(list = ls(all.names = TRUE))
+gc()
+
+# library(checkpoint)
+# checkpoint(snapshotDate = "2020-01-01")
 
 
 

@@ -1,0 +1,283 @@
+---
+title: "Assignment R Bootcamp"
+author: "Tu Tran und Andy Gubser"
+date: /today
+output: 
+  html_document:
+    theme: flatly
+    toc: true
+    toc_depth: 4
+    toc_float: 
+      collapsed: true
+      smooth_scroll: true
+    number_sections: true
+    df_print: paged
+
+---
+
+# Abstract
+
+## Purpose
+
+With this project we analyse the typical subscriber of bike sharing services in New York City. In particular, we evaluate who took the longest trips. Therefore, we control for their age, gender, and if they rode the bikes on weekdays, during daytimes or nighttimes, and during what weather conditions. 
+
+<!-- in 2016 regarding the following properties:  -->
+<!-- - Who is using the bikes? -->
+<!--   - gender (m/f) ** -->
+<!--   - age (recode from birth year =  2016-x)  -->
+<!-- - When are the bikes used -->
+<!--   - time (day/night) -->
+<!--   - date (weekdays/weekend) -->
+<!--   - month (summer/winter) ** -->
+<!--   - weather ** -->
+<!-- ** Andy tries to include these into the visualisation -->
+
+## Methodology
+The analysis bases on two datasets from Kaggle: the bikeshare dataset for New York City in 2016 [^1 https://www.kaggle.com/samratp/bikeshare-analysis#NYC-CitiBike-2016.csv] and the corresponding weather dataset [^2 https://www.kaggle.com/mathijs/weather-data-in-new-york-city-2016]. 
+
+
+
+## Results
+Our analysis shows ...
+
+
+## Suggested next steps
+
+
+# Setup
+```{r setup}
+# remove all objects loaded and clear memory
+rm(list = ls(all.names = TRUE))
+gc()
+library(checkpoint)
+checkpoint(snapshotDate = "2099-02-29")
+
+
+knitr::opts_chunk$set(echo=TRUE)
+set.seed(19)
+
+```
+
+
+## Library Import
+
+```{r importLibraries, include=FALSE}
+list.of.packages <- c("installr", "Hmisc", "ggmap", "tidyverse")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages)
+
+```
+
+# Data Import
+
+```{r dataImport, include=FALSE, echo=FALSE, }
+setwd("C:\\Users\\Andy Gubser\\OneDrive - Hochschule Luzern\\01 Studium\\03 MSc Data Science\\Master HS19\\Wahlpflichtmodule\\W.MSCIDS_RB01.H1901\\Assignment\\R_bootcamp\\bike-share-analysis\\Rscript")
+
+# # preprocess bike data
+# source("./d.bike_preprocessing.R")
+
+# # preprocess weather data and merge with preprocessed bike data
+# source("./d.weather_preprocessing.R")
+
+d.bike_weather <- readRDS("../data/d.bike_weather.rds")
+
+colnames(d.bike_weather)
+summary(d.bike_weather)
+
+```
+
+As preparation the dataset bike and the dataset wheather are joined. The merged dataset consists of 26 parameters and 245894 observations. 
+
+The parameters in the bike dataset include data about the rider such as usertype (subscriber or customer), birh year, gender, age. Further, the dataset include data about individual trips such as start, stop timestamps and tripduration, start and end station names and ids as well as the coordinates of these stations. 
+
+
+
+
+## Parameter Definition
+
+```{r}
+dim(d.bike_weather)
+len(d.bike_weather)
+colnames(d.bike_weather)
+```
+
+
+
+ [1] "startdate"               "tripduration"           
+ [3] "starttime"               "stoptime"               
+ [5] "start_station_id"        "start_station_name"     
+ [7] "start_station_latitude"  "start_station_longitude"
+ [9] "end_station_id"          "end_station_name"       
+[11] "end_station_latitude"    "end_station_longitude"  
+[13] "bikeid"                  "usertype"               
+[15] "birth_year"              "gender"                 
+[17] "age"                     "age_corr"               
+[19] "age_group"               "month"                  
+[21] "maximum_temperature"     "minimum_temperature"    
+[23] "average_temperature"     "precipitation"          
+[25] "snow_fall"               "snow_depth"
+
+
+
+tripduration in sec
+
+```{r}
+max(d.bike_weather["tripduration"])
+```
+
+
+```{r}
+2363758/3600
+```
+
+
+
+
+
+
+
+# Graphical Analysis
+
+```{r, include=FALSE, echo=FALSE}
+# get background map
+min_lon <- min(d.bike_weather$start_station_longitude, d.bike_weather$end_station_longitude)
+max_lon <- max(d.bike_weather$start_station_longitude, d.bike_weather$end_station_longitude)
+min_lat <- min(d.bike_weather$start_station_latitude, d.bike_weather$end_station_latitude)
+max_lat <- max(d.bike_weather$start_station_latitude, d.bike_weather$end_station_latitude)
+
+mad_map <- (map <- get_map(c(left = min_lon, bottom = min_lat, 
+                             right = max_lon, top = max_lat)))
+
+# take a random sample of size 1%
+d.bike_weather_sample = d.bike_weather[
+  base::sample(x=1:nrow(d.bike_weather), round(nrow(d.bike_weather)*1/100)), ]
+
+
+```
+
+
+
+```{r}
+#final map
+ggmap(mad_map) + 
+  geom_leg(
+    data=d.bike_weather_sample,
+      # color = factor(gender), 
+      alpha=0.1,
+      aes(
+        color = age_corr,
+        x = start_station_longitude, 
+        y = start_station_latitude, 
+        xend = end_station_longitude, 
+        yend = end_station_latitude
+        )
+      )+
+  labs(x="",y="") +
+  facet_grid(month ~ gender) +
+  theme(
+    axis.title.x=element_blank(),
+    axis.text.x=element_blank(),
+    axis.ticks.x=element_blank(),
+        
+    axis.title.y=element_blank(),
+    axis.text.y=element_blank(),
+    axis.ticks.y=element_blank()
+    ) + 
+  scale_color_viridis(option = "magma")
+
+ggsave("map_age_gender_month.pdf", device = "pdf")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+head(d.bike_weather)
+
+ggplot(data = d.bike_weather,
+  aes(y = tripduration, x = age_corr, fill=gender)
+  )+ 
+    geom_point()
+  
+# ) + 
+#   geom_leg(
+#     data=d.bike_weather_sample,
+#       # color = factor(gender), 
+#       alpha=0.1,
+#       aes(
+#         color = age_corr,
+#         x = start_station_longitude, 
+#         y = start_station_latitude, 
+#         xend = end_station_longitude, 
+#         yend = end_station_latitude
+#         )
+#       )+
+#   labs(x="",y="") +
+#   facet_grid(month ~ gender) +
+#   theme(
+#     axis.title.x=element_blank(),
+#     axis.text.x=element_blank(),
+#     axis.ticks.x=element_blank(),
+#         
+#     axis.title.y=element_blank(),
+#     axis.text.y=element_blank(),
+#     axis.ticks.y=element_blank()
+#     ) + 
+#   scale_color_viridis(option = "magma")
+
+# ggsave("tripduration_age_gender_month.pdf", device = "pdf")
+
+colnames(d.bike_weather)
+
+```
+
+
+```{r}
+# Set value for the minZoom and maxZoom settings.
+leaflet(options = leafletOptions(minZoom = 0, maxZoom = 18))
+
+m <- leaflet() %>%
+  addTiles() %>%  # Add default OpenStreetMap map tiles
+  addMarkers(lng=d.bike_weather$start_station_longitude, 
+             lat=d.bike_weather$start_station_latitude, 
+             popup="The birthplace of R")
+m  # Print the map
+
+```
+
+
+
+
+# Fit models
+
+
+
+
+
+# Check Results (output and graphs)
+
+
+
+
+
+# Interpretation
+
+
+
+
+
+```{r}
+# sessionInfo()
+# {miniCRAN} pkgDep()
+
+```

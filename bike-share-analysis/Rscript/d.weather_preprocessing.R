@@ -1,5 +1,9 @@
 # Install and load packages
 
+# remove all objects loaded and clear memory
+rm(list = ls(all.names = TRUE))
+gc()
+
 # library(checkpoint)
 # checkpoint(snapshotDate = "2020-01-01")
 
@@ -11,6 +15,8 @@ library("lubridate")
 library("Hmisc")
 
 ###### LOAD DATA ######
+d.bike <- readRDS("../data/d.bike.prepared.rds")
+
 # setwd("C:/Users/Andy Gubser/OneDrive - Hochschule Luzern/01 Studium/03 MSc Data Science/Master HS19/Wahlpflichtmodule/W.MSCIDS_RB01.H1901/Assignment/R_bootcamp/bike-share-analysis/Rscript")
 d.weather.raw <- read_csv("../data/weather_nyc_2016.csv")
 colnames(d.weather.raw)
