@@ -34,7 +34,7 @@ After data preparation, we provide an graphical analysis to approach the researc
 rm(list = ls(all.names = TRUE))
 gc()
 library(checkpoint)
-checkpoint(snapshotDate = "2020-12-29")
+#checkpoint(snapshotDate = "2099-12-29")
 
 knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
 knitr::opts_chunk$set(echo=TRUE)
@@ -215,6 +215,7 @@ rquery.cormat<-function(x,
   list(r=cormat, p=pmat, sym=sym)
 }
 
+<<<<<<< HEAD
 rquery.cormat(dplyr::select_if(d.bike_weather, is.numeric))
 
 ```
@@ -308,6 +309,8 @@ linear_model <- function(df, formula, str_splitDate){
 
 ```
 
+=======
+>>>>>>> c10f59f30861d894a8442120ba931be3b400bded
 ```{r, include=FALSE, echo=FALSE}
 # get background map
 min_lon <- min(d.bike_weather$start_station_longitude, d.bike_weather$end_station_longitude)
@@ -329,27 +332,7 @@ d.bike_weather_sample = d.bike_weather[
 
 ```{r}
 #final map
-<<<<<<< HEAD
-ggmap(mad_map) + 
-  geom_leg(
-    data=d.bike_weather_sample,
-      # color = factor(gender), 
-      alpha=0.1,
-      aes(
-        color = age_capped,
-        x = start_station_longitude, 
-        y = start_station_latitude, 
-        xend = end_station_longitude, 
-        yend = end_station_latitude
-        )
-      )+
-  labs(x="",y="") +
-  facet_grid(month ~ gender) +
-  theme(
-    axis.title.x=element_blank(),
-    axis.text.x=element_blank(),
-    axis.ticks.x=element_blank(),
-=======
+
 #ggmap(mad_map) + 
 #  geom_leg(
 #    data=d.bike_weather_sample,
@@ -369,7 +352,10 @@ ggmap(mad_map) +
 #    axis.title.x=element_blank(),
 #    axis.text.x=element_blank(),
 #    axis.ticks.x=element_blank(),
+<<<<<<< HEAD
 
+=======
+>>>>>>> c10f59f30861d894a8442120ba931be3b400bded
 #    axis.title.y=element_blank(),
 #    axis.text.y=element_blank(),
 #    axis.ticks.y=element_blank()
@@ -378,20 +364,6 @@ ggmap(mad_map) +
 
 #ggsave("map_age_gender_month.pdf", device = "pdf")
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 ```{r}
@@ -410,7 +382,7 @@ ggmap(mad_map) +
 
 ```{r}
 
-
+colnames(d.bike_weather)
 
 
 ```

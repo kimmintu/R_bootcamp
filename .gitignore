@@ -2,5 +2,9 @@
 .Rhistory
 .RData
 .Ruserdata
-bike-share-analysis/output/
-bike-share-analysis/data/
+
+#ignore generated files .rds
+*.rds
+
+#ignore output directory
+./bike-share-analysis/output/

@@ -111,5 +111,4 @@ d.bike <- filter(d.bike,
 summary(d.bike$gender)
 
 
-
 saveRDS(d.bike, file = "./data/d.bike.prepared.rds")
