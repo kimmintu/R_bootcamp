@@ -44,7 +44,7 @@ d.bike <- d.bike %>%
          usertype = factor(usertype),
          age = 2016-as.numeric(birth_year),
          age_capped = pmin(age, 70), 
-         age_group = cut(age, breaks = 20),
+         age_group = cut(age_capped, breaks = 10),
          
          month = factor(month(starttime), 
                         levels = seq(1,12,1), 

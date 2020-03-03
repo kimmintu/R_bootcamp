@@ -43,7 +43,7 @@ d.weather <- d.weather %>%
     weekday = weekdays(as.Date(date)),
     minimum_temperature_celsius = farenheit_to_celsius(minimum_temperature),
     maximum_temperature_celsius = farenheit_to_celsius(maximum_temperature),
-    average_temperature_celsis = farenheit_to_celsius(average_temperature),
+    average_temperature_celsius = farenheit_to_celsius(average_temperature),
     precipitation = as.numeric(precipitation),
     snow_fall = as.numeric(snow_fall),
     snow_depth = as.numeric(snow_depth)
