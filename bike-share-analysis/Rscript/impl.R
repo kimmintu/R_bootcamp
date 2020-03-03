@@ -133,14 +133,23 @@ unique(d.total$condition)
 hist(log(d.total$rental_count))
 hist(log(d.total$tripduration))
 
-d.month <- d.total %>% group_by(month, hour) %>% summarise(rental=round(mean(rental_count)))
-view(d.month)
+# d.data expects properties: category, hour, rental
+show_24h_category_statistics_plot <- function (d.data, title, category_name) {
+  ggplot(d.data, aes(x=hour, y=rental, color=category)) + 
+    geom_point(data=d.data, aes(group=category)) + 
+    geom_line(data=d.data, aes(group=category)) +
+    ggtitle(title) + 
+    scale_color_hue(category_name, breaks=levels(d.data$category))
+}
 
-ggplot(d.month, aes(x=hour, y=rental, color=month)) + 
-  geom_point(data=d.month, aes(group=month)) + 
-  geom_line(data=d.month, aes(group=month)) +
-  ggtitle("Rental by the months") + 
-  scale_color_hue("Month", breaks=levels(d.month$month))
+d.month <- d.total %>% group_by(month, hour) %>% 
+  summarise(rental=round(mean(rental_count))) %>%
+  rename(month = category)
+show_24h_category_statistics_plot(d.month, "24h Rental by Month", "Month")
+
+
+
+
 
 
 ## simple model - LM
