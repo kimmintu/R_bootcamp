@@ -142,13 +142,19 @@ show_24h_category_statistics_plot <- function (d.data, title, category_name) {
     scale_color_hue(category_name, breaks=levels(d.data$category))
 }
 
-d.month <- d.total %>% group_by(month, hour) %>% 
+# ggplot 24h by month
+d.month <- d.total %>% 
+  group_by(month, hour) %>% 
   summarise(rental=round(mean(rental_count))) %>%
-  rename(month = category)
+  rename(category = month)
 show_24h_category_statistics_plot(d.month, "24h Rental by Month", "Month")
 
-
-
+# ggplot 24h by weekday
+d.weekday <- d.total %>% 
+  group_by(weekday, hour) %>% 
+  summarise(rental=round(mean(rental_count))) %>%
+  rename(category = weekday)
+show_24h_category_statistics_plot(d.weekday, "24h Rental by Weekday", "Weekday")
 
 
 
