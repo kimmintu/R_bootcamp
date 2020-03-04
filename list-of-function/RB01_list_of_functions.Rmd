@@ -21,23 +21,23 @@ output:
 
 ```{r globalOpts, include=FALSE, purl=FALSE}
 library(knitr)
-opts_chunk$set(concordance = TRUE,
-               fig.align = "center",
-               out.width = "0.7\\linewidth", ## default is 1
-               tidy = FALSE,
-               comment = NA,
-               message = FALSE,
-               fig.pos = "H",
-               crop = hook_pdfcrop) ## changes mar defaults...
-##
+knitr::opts_chunk$set(
+  root.dir = rprojroot::find_rstudio_root_file(),
+  
+  ## knitr options ##
+  echo = TRUE, ## include R Code
+  include=TRUE, ## include the chunk output 
+  
+  ## format text, numbers and figures ##
+  fig.align = "center", ## 
+  out.width = "0.9\\linewidth", ## default is 1
+  fig.pos = "H"
+  ) 
+  ##
 options(digits = 2)
 ```
 
-
-```{r}
-knitr::opts_chunk$set(echo = TRUE, include=TRUE)
-```
-
+For more Informations to RMarkdown:
 - The Definitive Guide: https://bookdown.org/yihui/rmarkdown/
 - R Markdown Cheat Sheet: https://rstudio.com/wp-content/uploads/2016/03/rmarkdown-cheatsheet-2.0.pdf
 - R Markdown Reference Guide: https://rstudio.com/wp-content/uploads/2015/03/rmarkdown-reference.pdf
@@ -148,10 +148,14 @@ methods(write.csv) # not a generic function
 setwd(getwd())
 
 ## import data
+
+d.birthRates <- read.csv2("../DataSets/birthrates.csv")
 d.blueEggs <- read.table("../DataSets/BlaueEier.txt",
-           header = TRUE)
+                         header = TRUE)
 d.sports <- read.table("http://stat.ethz.ch/Teaching/Datasets/sport.dat",
                        header = TRUE)
+
+
 
 ## export data
 # write.csv2(d.sports, "SportsDataset.csv")
@@ -159,22 +163,35 @@ d.sports <- read.table("http://stat.ethz.ch/Teaching/Datasets/sport.dat",
 # write.table()
 ```
 
-```{r}
 ## inspect data
-str(iris)
-dim(iris) ## nrow(iris); ncol(iris)
+
+
+```{r}
 head(iris)
+str(iris)
+
+## Dimensions ##
+dim(iris) 
+nrow(iris)
+ncol(iris)
+
+## Basic Stats ##
 summary(iris)
 table(iris[, "Species"])
 
 min(iris$Sepal.Length)
 max(iris$Sepal.Length)
-mean(x = 1:13)
+mean(iris$Sepal.Length)
 range(iris$Sepal.Length)
 levels(iris$Species)
+
+## number of levels of factor ##
 nlevels(iris$Species)
+
+## count same values ##
 length(unique(iris$Sepal.Length))
-## see also n_distinct() in package {dplyr}
+library(dplyr)
+n_distinct(iris$Sepal.Length)
 
 ```
 
@@ -366,7 +383,7 @@ methods(class = "lm")
 # Data Visualisation
 
 
-## Base R plot function
+## Low-Level plotting functions
 ```{r}
 d.Puromycin.plot <- plot(y = Puromycin$rate, 
      x = Puromycin$conc,
@@ -403,6 +420,9 @@ boxplot(Petal.Length ~ Species, data = iris)
 ## interactive functions ##
 ## identify
 plot(Agriculture ~ Fertility, data = swiss)
+abline(v=60, col="blue")
+
+# first example : Add one line
 identify(y = swiss$Agriculture, x = swiss$Fertility)
 ## click on "finish" icon
 swiss[c(46,19,7), ]
