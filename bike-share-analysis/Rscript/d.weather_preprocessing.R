@@ -25,6 +25,7 @@ describe(d.weather.raw)
 dim(d.weather.raw)
 ###### CONVERT DATA ######
 d.weather <- d.weather.raw %>% select_all(snakecase::to_snake_case)
+
 colnames(d.weather)
 describe(d.weather)
 
@@ -49,13 +50,21 @@ d.weather <- d.weather %>%
     snow_depth = as.numeric(snow_depth)
   )
 
-
 colnames(d.weather)
 for (col in d.weather){
   print(class(col))
 }
 
 ###### CREATE DATE ######
-d.weather$date <- dmy(d.weather$date)
 describe(d.weather$date)
 
+###### MERGE WEATHER AND BIKE DATA ######
+d.bike_weather <- base::merge(y=d.bike, x=d.weather, 
+                        by.y=c("startdate"), 
+                        by.x=c("date")
+                        )
+
+colnames(d.bike_weather)
+d.bike_weather$date = as.Date(d.bike_weather$date)
+
+saveRDS(d.bike_weather, file = "./data/d.bike_weather.rds")
