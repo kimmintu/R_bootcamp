@@ -55,7 +55,7 @@ set.seed(19)
 ```{r importLibraries, include=FALSE}
 list.of.packages <- c("installr", "Hmisc", "ggmap", "tidyverse", "tidyr", "corrplot",
                       "viridis", "leaflet", "lubridate", "checkpoint", "zoo", "caTools",
-                      "randomForest", "boot")
+                      "randomForest", "boot", "ggpubr")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
 for (p in list.of.packages){
@@ -283,14 +283,10 @@ show_24h_category_statistics_plot(d.weekday, "24h Rental by Weekday", "Weekday")
 As illustrated on the box plot, overall the rental low season is in winter and high season in autumn. The lowest months are January and February with a median rental per hour for only about 15. From March to Juni, there is an increasing trend in the rental. July witnesses a small drop, but then going upward to reach its peak in September. At its peak, the trend drops about 10% to 15% over months still January. The rental trend could possibly be explained with the temperature and klimate over the months. When it is colder, there are less rentals. When it is getting warmer, the trend increases. When it is much hotter, e.g. mid-sommer, there is a drop in trend. And people enjoy biking at cool and fair weather the most.
 
 ```{r}
+
 ggplot(d.total, aes(x=month, y=rental_count, color=month)) +
   geom_boxplot(data=d.total, aes(group=month))
 
-# ggplot 24h by month
-d.month <- d.total %>% group_by(month, hour) %>%  
-  summarise(rental = round(mean(rental_count))) %>%
-  rename(category = month)
-show_24h_category_statistics_plot(d.month, "24h Rental by Month", "Month")
 ```
 
 ## ggplot rentals over 24h for different months
@@ -326,10 +322,6 @@ The below heatmap shows some strong correlation between several predictors. High
 ## correlation plot
 d.total[,5:10] %>% cor() %>% corrplot(method = 'color', addCoef.col="black")
 
-hist(d.total$rental_count)
-hist(log(d.total$rental_count))
-hist(log(d.total$tripduration))
-
 ```
 
 # Fitting models
@@ -342,47 +334,148 @@ As the amount of bike rental the prediction a count data, we will use the Poisso
 ### simple model ###
 set.seed(1)
 d.split <- sample.split(d.total, SplitRatio = 0.7)
-
 d.train <- subset(d.total, subset = d.split)
 d.test <- subset(d.total, subset = !d.split)
 
 # fit model on train data
-# linear regression
-lm.fit <- lm(log(rental_count) ~ type + hour, data=d.train)
 # poisson
-lm.fit <- glm(rental_count ~ type + hour, family="poisson", data=d.train)
+pm.fit <- glm(rental_count ~ type + hour, family="poisson", data=d.train)
+#summary(lm.fit)
 # predict model on test data
-lm.pred <- predict(lm.fit, newdata = d.test)
-head(round(lm.pred))
-head(lm.pred)
-# compute R^2
-cor(lm.pred, d.test$rental_count)^2
-drop1(lm.fit, test="F")
+pm.pred <- predict(pm.fit, newdata = d.test, type="response")
+# compute MSE
+mean((d.test$rental_count - pm.pred)^2)
+#drop1(lm.fit, test="F")
 # residual
-resid_values <- resid(lm.fit)
+resid_values <- resid(pm.fit)
 length(resid_values)
+head(resid_values)
+# residual analysis plots
+par(mfrow=c(2,2))
+plot(pm.fit)
+
+# ggplot predicted values of hourly rental for different weather types
+p1 <- ggplot(d.test, aes(x=hour, y=pm.pred, color=type)) + 
+  geom_point(data=d.test, aes(group=type)) + 
+  ggtitle("Prediction values") + 
+  scale_color_hue("Weather Type", breaks=levels(d.test$type))
+
+# ggplot true values of hourly rental for different weather types
+p2 <- ggplot(d.test, aes(x=hour, y=rental_count, color=type)) + 
+  geom_point(data=d.test, aes(group=type)) + 
+  ggtitle("Real values") + 
+  scale_color_hue("Weather Type", breaks=levels(d.test$type))
+
+figure <- ggarrange(p1, p2, ncol=2, common.legend = TRUE, legend="bottom")
+annotate_figure(figure, top = text_grob("Hour & Weather on Rental - Simple Poisson Model", size = 14))
+
+```
+
+## More complex model: Poisson model with full predictors
+
+```{r}
+# Poisson model with full predictors
+pm.fit <- glm(rental_count ~ . - rental_count - tripduration - dewpoint - date, 
+              data=d.train)
+pm.err <- cv.glm(d.train, pm.fit, K=10)$delta[1]
+pm.err
+
+#summary(lm.fit)
+# predict model on test data
+pm.pred <- predict(pm.fit, newdata = d.test, type="response")
+# compute MSE
+mean((d.test$rental_count - pm.pred)^2)
+#drop1(lm.fit, test="F")
+# residual
+resid_values <- resid(pm.fit)
+length(resid_values)
+head(resid_values)
+# residual analysis plots
+par(mfrow=c(2,2))
+plot(pm.fit)
+
+# ggplot predicted values of hourly rental for different weather types
+p1 <- ggplot(d.test, aes(x=hour, y=pm.pred, color=type)) + 
+  geom_point(data=d.test, aes(group=type)) + 
+  ggtitle("Prediction values") + 
+  scale_color_hue("Weather Type", breaks=levels(d.test$type))
+
+# ggplot true values of hourly rental for different weather types
+p2 <- ggplot(d.test, aes(x=hour, y=rental_count, color=type)) + 
+  geom_point(data=d.test, aes(group=type)) + 
+  ggtitle("Real values") + 
+  scale_color_hue("Weather Type", breaks=levels(d.test$type))
+
+figure <- ggarrange(p1, p2, ncol=2, common.legend = TRUE, legend="bottom")
+annotate_figure(figure, top = text_grob("Hour & Weather on Rental - Complex Poisson Model", size = 14))
+
+```
+
+## More complex model: Linear model with different polynomial levels
+In this section, we apply cross validation in order to run a list of complex models with increasing polynomial levels of the temperature predictor. Besides, these models have many predictors and an interaction between humidity and dewpoint.
+
+
+The histograms below show that the distribution of rental_count is not normal distribution. We have to use log transformation for fitting a linear model.
+```{r}
+## check normal distribution for linear model fitting
+par(mfrow=c(1, 2))
+hist(d.total$rental_count)
+hist(log(d.total$rental_count))
+
+```
+
+Fitting linear model
+```{r}
+set.seed(1)
+
+cv.error.10 <- rep(0, 10)
+for (i in 1:10) {
+  glm.fit <- glm(log(rental_count) ~ type + month + weekday + hour + humidity * dewpoint +
+                   poly(windspeed, degree=i) + poly(temperature, degree=i), data=d.train)
+  cv.error.10[i] <- cv.glm(d.train, glm.fit, K=10)$delta[1]
+}
+
+best.level <- which.min(cv.error.10)
+
+glm.fit.best <- glm(log(rental_count) ~ type + month + weekday + hour + humidity * dewpoint +
+                   poly(windspeed, degree = best.level) + poly(temperature, degree = best.level), data=d.train)
+
+# predict model on test data
+glm.pred <- predict(glm.fit.best, newdata = d.test)
+# convert log value to normal value via exponential
+glm.pred <- exp(glm.pred)
+
+
+# optimize predictors
+drop1(glm.fit.best, test="F")
+# compute MSE
+mean((d.test$rental_count - glm.pred)^2)
+# residual
+resid_values <- resid(glm.fit.best)
 head(resid_values)
 
 # plot
 par(mfrow=c(2,2))
-#par(mar = rep(2, 4))
-plot(lm.fit)
+plot(glm.fit.best)
+
+# ggplot predicted values of hourly rental for different weather types
+p1 <- ggplot(d.test, aes(x=hour, y=glm.pred, color=type)) + 
+  geom_point(data=d.test, aes(group=type)) + 
+  ggtitle("Prediction values") +
+  scale_color_hue("Weather Type", breaks=levels(d.test$type))
+
+# ggplot true values of hourly rental for different weather types
+p2 <- ggplot(d.test, aes(x=hour, y=rental_count, color=type)) + 
+  geom_point(data=d.test, aes(group=type)) + 
+  ggtitle("Real values") + 
+  scale_color_hue("Weather Type", breaks=levels(d.test$type))
+
+figure <- ggarrange(p1, p2, ncol=2, common.legend = TRUE, legend="bottom")
+annotate_figure(figure, top = text_grob("Hour & Weather on Rental - Polynomial Linear Model", size = 14))
 
 
 ```
 
-
-## More different complex models
-TODO:
-
-```{r}
-## Poisson model with all possible predictors
-
-
-## Linear models with different polynomial levels
-
-
-```
 
 
 ## A chapter of your choice: Regression Tree Randonforest
