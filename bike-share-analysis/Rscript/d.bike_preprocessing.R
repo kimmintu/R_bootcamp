@@ -1,105 +1,114 @@
-# Install and load packages
+#### PREPROCESSING OF BIKESHAREING DATA ####
 
 # remove all objects loaded and clear memory
 rm(list = ls(all.names = TRUE))
 gc()
 
 
-# library(checkpoint)
-# checkpoint(snapshotDate = "2020-01-01")
+## load packages and install them when necessary ##
+list.of.packages <- c("installr", "Hmisc", "ggmap", "tidyverse", "tidyr",
+                      "viridis", "leaflet", "lubridate", "checkpoint", "zoo")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages)
+for (p in list.of.packages){
+  library(p, character.only = TRUE)
+}
 
-###### LOAD PACKAGES ######
-# create function eventually install and load all packages <- 
-if(!require("tidyverse")) install.packages("tidyverse")
-library("tidyverse")
-library("lubridate")
-library("Hmisc")
+checkpoint(snapshotDate = "2099-12-29")
+
+
 
 ###### LOAD DATA ######
-# getwd()
-# setwd("C:/Users/Andy Gubser/OneDrive - Hochschule Luzern/01 Studium/03 MSc Data Science/Master HS19/Wahlpflichtmodule/W.MSCIDS_RB01.H1901/Assignment/R_bootcamp/bike-share-analysis/Rscript")
 d.bike.raw = read_csv("./data/NYC-CitiBike-2016.csv")
 colnames(d.bike.raw)
 dim(d.bike.raw)
 # describe(d.bike.raw)
 
 ###### CONVERT DATA ######
+
+# replace white space by underscore in column names 
 d.bike <- d.bike.raw %>% select_all(snakecase::to_snake_case)
 
+# mutate data
 d.bike <- d.bike %>%
-  mutate(starttime = mdy_hms(starttime),
-         stoptime = mdy_hms(stoptime),
-         startdate = date(starttime), # YYYY-MM-DD
-         startdate = as.Date(startdate),
-         tripduration_min = tripduration/60,
-         gender = factor(gender, 
-                         levels = c(0,1,2), 
-                         labels = c("X", "M", "F")
-                         ) ,
-         start_station_id = factor(start_station_id),
-         start_station_name = factor(start_station_name),
-         end_station_id = factor(end_station_id),
-         end_station_name = factor(end_station_name),
-         bikeid = factor(bikeid),
-         usertype = factor(usertype),
-         age = 2016-as.numeric(birth_year),
-         age_capped = pmin(age, 70), 
-         age_group = cut(age_capped, breaks = 10),
-         
-         month = factor(month(starttime), 
-                        levels = seq(1,12,1), 
-                        labels = c("Jan", "Feb", "Mar", 
-                                   "Apr", "Mai", "Jun", 
-                                   "Jul", "Aug", "Sep", 
-                                   "Oct", "Nov", "Dec"))
-         )
+  mutate(
+    # extract month, date, weekday, hour from starttime
+    starttime = mdy_hms(starttime),
+    stoptime = mdy_hms(stoptime),
+    date = as.Date(date(starttime)),
+    month = factor(month(starttime), 
+                   levels = seq(1,12,1), 
+                   labels = c("Jan", "Feb", "Mar", 
+                              "Apr", "Mai", "Jun", 
+                              "Jul", "Aug", "Sep", 
+                              "Oct", "Nov", "Dec")),
+    weekday = factor(weekdays(starttime)),
+    hour = factor(hour(starttime)),
 
+    tripduration_min = tripduration/60,
+    gender = factor(
+      gender, 
+      levels = c(0,1,2), 
+      labels = c("X", "M", "F")
+      ) ,
+    start_station_id = factor(start_station_id),
+    start_station_name = factor(start_station_name),
+    end_station_id = factor(end_station_id),
+    end_station_name = factor(end_station_name),
+    bikeid = factor(bikeid),
+    usertype = factor(usertype),
+    age = 2016-as.numeric(birth_year),
+    age_capped = pmin(age, 70), 
+    age_group = cut(age_capped, breaks = 10)
+    )
+
+## Mutate Age above 70 ##
 summary(d.bike$age)
 summary(as.numeric(d.bike$age_cappedegory))
 hist(d.bike$age)
 hist(as.numeric(d.bike$age_cappedegory))
-# describe(d.bike$startdate)
 
 
 ###### DROP OUTLIERS######
 
+## COORDINATES ##
+p.start_station.raw <- ggplot() +
+  geom_point(
+    aes(x=start_station_latitude, y=start_station_longitude), data=d.bike)
+p.start_station.raw
+
+p.end_station.raw <- ggplot() +
+  geom_point(
+    aes(x=end_station_latitude, y=end_station_longitude), data=d.bike)
+p.end_station.raw
 
 d.bike <- filter(d.bike, 
-                 tripduration_min < 200
-                   )
+                 start_station_latitude > 40.6,
+                 end_station_latitude > 40.6
+)
+
+p.start_station.filtered <- ggplot() +
+  geom_point(
+    aes(x=start_station_latitude, y=start_station_longitude), data=d.bike)
+p.start_station.filtered
+
+p.end_station.filtered <- ggplot() +
+  geom_point(
+    aes(x=end_station_latitude, y=end_station_longitude), data=d.bike)
+p.end_station.filtered
+
+
+
+## TRIPDURATION ##
 hist(d.bike$tripduration_min)
 
-table(d.bike$tripduration)
+# drop tripduration above 2 hours
+d.bike <- filter(d.bike, tripduration_min <= 120)
+hist(d.bike$tripduration_min)
 
-# coordinates
-# start_plot <- ggplot() +
-#   geom_point(
-#     aes(x=start_station_latitude, y=start_station_longitude), data=d.bike)
-# start_plot
-# 
-# end_plot <- ggplot() +
-#   geom_point(
-#     aes(x=end_station_latitude, y=end_station_longitude), data=d.bike)
-# end_plot
-
-d.bike <- filter(d.bike, 
-                  start_station_latitude > 40.6,
-                  end_station_latitude > 40.6
-                  )
-# 
-# start_plot2 <- ggplot() +
-#   geom_point(
-#     aes(x=start_station_latitude, y=start_station_longitude), data=d.bike)
-# # start_plot2
-# 
-# end_plot2 <- ggplot() +
-#   geom_point(
-#     aes(x=end_station_latitude, y=end_station_longitude), data=d.bike)
-# # end_plot2
-
-summary(d.bike$usertype)
 
 ###### FILTER SUBSCRIBERS ######
+summary(d.bike$usertype)
 d.bike <- filter(d.bike, usertype == "Subscriber")
 
 ###### EXCLUDE UNKNOWN GENDER ######
@@ -111,4 +120,5 @@ d.bike <- filter(d.bike,
 summary(d.bike$gender)
 
 
+## EXPORT DATA ##
 saveRDS(d.bike, file = "./data/d.bike.prepared.rds")

@@ -1,23 +1,24 @@
-# Install and load packages
+### PREPROCESSING OF WEATHER DATA ####
 
 # remove all objects loaded and clear memory
 rm(list = ls(all.names = TRUE))
 gc()
 
-# library(checkpoint)
-# checkpoint(snapshotDate = "2020-01-01")
 
-###### LOAD PACKAGES ######
-# create function eventually install and load all packages <- 
-if(!require("tidyverse")) install.packages("tidyverse")
-library("tidyverse")
-library("lubridate")
-library("Hmisc")
+## load packages and install them when necessary ##
+list.of.packages <- c("installr", "Hmisc", "ggmap", "tidyverse", "tidyr",
+                      "viridis", "leaflet", "lubridate", "checkpoint", "zoo")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages)
+for (p in list.of.packages){
+  library(p, character.only = TRUE)
+}
+
+checkpoint(snapshotDate = "2099-12-29")
+
+
 
 ###### LOAD DATA ######
-d.bike <- readRDS("./data/d.bike.prepared.rds")
-colnames(d.bike)
-
 d.weather.raw <- read_csv("./data/weather_nyc_2016.csv")
 colnames(d.weather.raw)
 describe(d.weather.raw)
@@ -57,15 +58,4 @@ for (col in d.weather){
 ###### CREATE DATE ######
 d.weather$date <- dmy(d.weather$date)
 describe(d.weather$date)
-
-###### MERGE WEATHER AND BIKE DATA ######
-d.bike_weather <- base::merge(y=d.bike, x=d.weather, 
-                        by.y=c("startdate"), 
-                        by.x=c("date")
-                        )
-
-colnames(d.bike_weather)
-d.bike_weather$date = as.Date(d.bike_weather$date)
-
-saveRDS(d.bike_weather, file = "./data/d.bike_weather.rds")
 

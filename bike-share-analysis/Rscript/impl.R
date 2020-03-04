@@ -48,6 +48,7 @@ d.bike <- d.bike.raw %>%
 d.bike %>% filter(tripduration < 121) %>% 
   ggplot(aes(x=(tripduration))) + geom_histogram() + xlim(c(0, 50))
 
+"was machst du da, Tu? "
 d.bike <- filter(d.bike, tripduration < 1441) # only use data with rental < 24 hours
 
 # aggreate bike sharing data on hour basis
