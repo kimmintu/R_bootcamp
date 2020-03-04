@@ -1,0 +1,588 @@
+---
+title: "R Bootcamp - List of Functions"
+author: "Tu Tran und Andy Gubser"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: 
+  html_document:
+    theme: flatly
+    toc: true
+    toc_depth: 4
+    toc_float: 
+      collapsed: true
+      smooth_scroll: true
+    number_sections: true
+    df_print: paged
+
+---
+
+\tableofcontents
+
+# R Markdown
+
+```{r globalOpts, include=FALSE, purl=FALSE}
+library(knitr)
+opts_chunk$set(concordance = TRUE,
+               fig.align = "center",
+               out.width = "0.7\\linewidth", ## default is 1
+               tidy = FALSE,
+               comment = NA,
+               message = FALSE,
+               fig.pos = "H",
+               crop = hook_pdfcrop) ## changes mar defaults...
+##
+options(digits = 2)
+```
+
+
+```{r}
+knitr::opts_chunk$set(echo = TRUE, include=TRUE)
+```
+
+- The Definitive Guide: https://bookdown.org/yihui/rmarkdown/
+- R Markdown Cheat Sheet: https://rstudio.com/wp-content/uploads/2016/03/rmarkdown-cheatsheet-2.0.pdf
+- R Markdown Reference Guide: https://rstudio.com/wp-content/uploads/2015/03/rmarkdown-reference.pdf
+
+
+# Base R
+## Global Environment
+
+```{r}
+ls() # list all elements in global environment
+
+?mean
+help(mean)
+
+apropos("filter")
+apropos("filter", where = TRUE)
+pos.to.env(4) ## or search()
+pos.to.env(6)
+```
+
+## Lists
+```{r}
+seq(from = 1, to = 10, length.out = 5)
+rep(x = 1:3, times = 4)
+```
+
+
+
+## Matrices
+
+```{r}
+# create a matrix
+M.1 <- matrix(data = 6:1, nrow = 2, ncol = 3)
+M.1
+
+# equivalent to
+rbind(c(6,4,2), c(5,3,1))
+cbind(1:2, 3:4, 5:6)
+
+# add a column to existing matrix
+cbind(M.1, c(99, 102))
+
+# replace()
+```
+
+## Data Frames
+```{r}
+## creating a data frame
+v.participant.name <- c("Max", "Tony Müller", "Andreas", "Ramona", "Nick Q.")
+v.age <- c(17, 23, 45, 11, 44)
+v.minor.YES <- c(TRUE, FALSE, FALSE, TRUE, FALSE)
+d.test <- data.frame(v.participant.name, v.age, v.minor.YES)
+d.test
+
+## class of the single elements
+class(v.participant.name)
+class(v.age)
+class(v.minor.YES)
+class(d.test)
+
+## Attributes
+colnames(d.test)
+rownames(d.test)
+# tibble::rownames_to_column(d.sports)
+
+
+```
+
+## Functions
+```{r}
+help(mean)
+?mean
+
+my.mean <- function(x){
+  N <- length(x)
+  Sum <- sum(x)
+  computed.mean <- Sum / N
+  return(computed.mean)
+}
+
+v.1 <- rnorm(n = 10^3, mean = 2)
+v.2 <- rnorm(n = 10^3, mean = 2)
+
+my.mean(v.1)
+
+
+```
+
+
+## Methods
+
+```{r}
+lm.iris <- lm(Sepal.Width ~ Species, data = iris)
+summary(lm.iris)
+
+methods(summary)
+methods(class = "lm")
+methods(class = "matrix")
+methods(write.csv) # not a generic function
+
+
+```
+
+
+# Import Data
+```{r}
+## set and get working directory
+setwd(getwd())
+
+## import data
+d.blueEggs <- read.table("../DataSets/BlaueEier.txt",
+           header = TRUE)
+d.sports <- read.table("http://stat.ethz.ch/Teaching/Datasets/sport.dat",
+                       header = TRUE)
+
+## export data
+# write.csv2(d.sports, "SportsDataset.csv")
+# write.csv()
+# write.table()
+```
+
+```{r}
+## inspect data
+str(iris)
+dim(iris) ## nrow(iris); ncol(iris)
+head(iris)
+summary(iris)
+table(iris[, "Species"])
+
+min(iris$Sepal.Length)
+max(iris$Sepal.Length)
+mean(x = 1:13)
+range(iris$Sepal.Length)
+levels(iris$Species)
+nlevels(iris$Species)
+length(unique(iris$Sepal.Length))
+## see also n_distinct() in package {dplyr}
+
+```
+
+
+# Data Preprocessing
+
+## Mutate, Filter, Arange, Select with {dplyr}
+```{r}
+library(dplyr)
+d.sports <- tibble::rownames_to_column(d.sports)
+
+d.sports %>% 
+  mutate(weit.in.cm = weit*100) %>%
+#  select(d.sports, contains("e"))
+#                  starts_with(...)
+#                  ends_with(...)
+  filter(hoch > 200, weit.in.cm >= 780) %>% # filter observations
+  arrange(hoch, desc(weit.in.cm)) %>% # sort observations
+  select(rowname, weit.in.cm, hoch, punkte) %>%  # select variables
+  head
+
+## sample observations
+## select random rows from a table
+head(d.sports)
+sample_n(d.sports, size = 10)
+sample_frac(d.sports, size = 0.2)
+```
+
+### Replace NA with {tidyr}
+```{r}
+d.sports.NA <- d.sports
+d.sports.NA[1:2, "weit"] <- NA 
+d.sports.NA[3:6, "kugel"] <- NA 
+d.sports.NA
+
+
+library(tidyr)
+replace_na(d.sports.NA, 
+           list(weit = 2, kugel = 10)) %>% 
+  head
+
+
+```
+
+# Export Data
+```{r}
+saveRDS(d.sports, file = "DSports.RDS")
+```
+
+
+# Data Analysis
+
+## Deskriptive Analysis
+
+```{r}
+## summarise data
+head(iris)
+iris %>% 
+  summarise(mean.SepalLength = mean(Sepal.Length))
+
+iris$Sepal.Length %>% ## with pipe
+  mean %>% 
+  round(digits = 2)
+
+iris %$% ## with exposition pipe
+  mean(Sepal.Length) %>% 
+  round(digits = 2)
+
+## summarise data with Scaling and Centering of Matrix-like Objects
+iris %>% 
+  subset(Species == "setosa") %$% 
+  scale(Petal.Length, scale = TRUE, center = FALSE) %>% 
+  mean
+
+
+## summarise per group
+iris %>% 
+  group_by(Species) %>% 
+  summarise(mean.SepalLength = mean(Sepal.Length))
+
+
+## get top n observations
+iris %>% 
+  group_by(Species) %>% 
+  top_n(n = 2, wt = Sepal.Length) ## by default wt is the last column
+
+
+## counting observations
+iris %>% 
+  group_by(Species) %>% 
+  summarise(No.Obs = n())
+
+
+## adding a counter
+iris %>% 
+  mutate(id = 1:n())
+## adding a counter within group
+iris %>% 
+  group_by(Species) %>% 
+  mutate(id = 1:n())
+
+
+## forcing printing
+iris %>% 
+  group_by(Species) %>% 
+  mutate(id = 1:n()) %>% 
+  print(width = Inf, n = 51)
+
+## reshape datasets
+
+library(tibble) ## for rownames_to_column()
+d.sport <- d.sport %>% 
+  rownames_to_column(var = "Athlete")
+d.sport
+
+## from wide to long
+library(tidyr) ## for gather()
+d.sport.long <- gather(d.sport, 
+                 key = "discipline", ## new column with name of the discipline
+                 value = "result", ## new column with value (unquoted also works)
+                 -Athlete) ## variable(s) that is(are) not to put as results
+##
+head(d.sport.long)
+d.sport.long %>% 
+  subset(subset = Athlete == "OBRIEN")
+
+
+## from wide to long
+d.sport.wide.again <- spread(d.sport.long, 
+                             key = "discipline", ## name from long df
+                             value = "result") ## name from long df
+head(d.sport.wide.again)
+
+## change from upper case names to lower case names
+d.sport.wide.again$Athlete <- tolower(d.sport.wide.again$Athlete)
+head(d.sport.wide.again)
+
+
+
+```
+
+**Note:** the data format needed for supervised problems is long-format (each row represents a single observation). 
+Whereas, for unsupervised problems, wide-format is required (i.e. one represents several measurements). For example, a sample of wine where several aspects where quantified.
+
+
+## Joining Datasets
+```{r}
+set.seed(14)
+d.age <- data.frame(age = runif(n = 7, min = 19, max = 34),
+                    Athlete = d.sport$Athlete,
+                    Gender = c("M","M","F","M","F","F","F"))
+d.age
+
+library(dplyr)
+d.sport.long.age <- left_join(d.sport.long, d.age, by = "Athlete")
+head(d.sport.long.age)
+
+class(d.sport.long$Athlete)
+class(d.age$Athlete)
+
+```
+
+
+
+## Regression Analysis
+
+```{r}
+## Generic and methods functions
+lm.1 <- lm(Sepal.Length ~ Petal.Length,
+           data = iris)
+summary(lm.1)
+summary(iris)
+## same function , different behaviour?
+## --> summary is a generic function
+class(lm.1)
+methods(summary)
+methods(class = "lm")
+
+?summary.lm ## has its own help page
+?summary.data.frame ## redirects you to the *generic* function help page
+
+```
+
+
+
+
+
+
+# Data Visualisation
+
+
+## Base R plot function
+```{r}
+d.Puromycin.plot <- plot(y = Puromycin$rate, 
+     x = Puromycin$conc,
+     pch = 19, # pch 19 is a filled circle
+     col = "red", # set color
+     cex = 3, # set point size
+  
+     # add a title and axis labels
+     main = "Reaction rates vs. Conc",
+     xlab = "substrate conc [ppm]",
+     ylab = "reaction rates [counts/min]", 
+     type = "p")
+# type = "l" # lines
+# type = "b" # both (points and lines)
+# type = "n" # nothing
+# lty = "dashed") # line types
+
+## formula interface
+# plot(rate ~ conc, data = Puromycin)
+
+# graphical parameters
+graphical.parameters <- par()
+head(graphical.parameters)
+str(graphical.parameters)
+
+# multiple plots on one screen 
+par(mfrow = c(1, 2))
+plot(1:19, 1:19, pch = 1:19, col = 1:19)
+boxplot(Petal.Length ~ Species, data = iris)
+
+## get back to default values
+# dev.off()
+
+## interactive functions ##
+## identify
+plot(Agriculture ~ Fertility, data = swiss)
+identify(y = swiss$Agriculture, x = swiss$Fertility)
+## click on "finish" icon
+swiss[c(46,19,7), ]
+
+## pannelling ##
+head(Loblolly,  n = 8)
+levels(Loblolly$Seed)
+nlevels(Loblolly$Seed)
+table(Loblolly$Seed)
+
+plot(height ~ age, data = Loblolly, col = Seed)
+
+```
+
+## Package {lattice}
+
+```{r}
+library(lattice)
+xyplot(height ~ age, data = Loblolly,
+       type = c("p", "smooth", "g"))
+# "p": points
+# "b"/"o": both (overplotted)
+# "r": add linear regression line
+# "smooth": add loess fit
+# "spline": add cubic smoothing spline line
+
+```
+
+## Package {ggplot2}
+
+```{r, include=TRUE}
+
+## {ggplot2} ##
+library(ggplot2)
+
+## base call ggplot()
+ggplot(data = Loblolly,
+       mapping = aes(y = height,
+                     x = age)) +
+  geom_point()
+
+## i) panelling
+ggplot(data = Loblolly,
+       mapping = aes(y = height,
+                     x = age)) +
+  geom_point() +
+  facet_wrap(. ~ Seed) ## !
+
+# equivaltent to:
+qplot(y = height, x = age, data = Loblolly, facets = ~ Seed)
+
+
+## ii) grouping (colouring)
+ggplot(data = Loblolly,
+       mapping = aes(y = height,
+                     x = age,
+                     colour = Seed)) + ## !
+  geom_point()
+##
+ggplot(data = Loblolly,
+       mapping = aes(y = height,
+                     x = age,
+                     colour = Seed)) +
+  geom_line() ## !
+
+## ii) grouping (no colouring)
+ggplot(data = Loblolly,
+       mapping = aes(y = height,
+                     x = age,
+                     group = Seed)) + ## !
+  geom_line()
+
+## iii) adding summary statistics
+ggplot(data = Loblolly,
+       mapping = aes(y = height,
+                     x = age)) +
+  geom_point() +
+  geom_smooth()
+##
+ggplot(data = Loblolly,
+       mapping = aes(y = height,
+                     x = age)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+
+```
+
+Here the link to the {ggplot2} Cheatsheet: https://github.com/rstudio/cheatsheets/blob/master/data-visualization-2.1.pdf
+
+# Regression Models
+
+```{r}
+
+
+
+
+```
+
+
+
+# Packages
+Load all packages at the very beginning of your code to avoid surprises and to get the function you want (e.g. base::filter() or mgcv::gam()
+
+
+```{r, include=FALSE}
+
+
+
+## "Default R packages" ##
+# sessionInfo()
+# find("lm")
+# #?lm
+# 
+# ## add-on packages ##
+# ## installing add-on packages
+# #install.packages("boot")
+# 
+# ## loading add-on packages
+# library(gam)
+# 
+# ## help about a package
+# #?gam
+# #help(package = "gam")
+# 
+# ## Where are packages installed? ##
+# .libPaths()
+# 
+# ## finding functions? ##
+# find("boxplot")
+# apropos("packages")
+# 
+# ## coflicts ##
+# ## To make sure that you work with a given function ##
+# gam.3 <- mgcv::gam(Sepal.Width ~ s(Petal.Width), data = iris)
+# summary(gam.3)
+# 
+# ## add-on packages evolve
+# packageVersion("lme4")
+
+```
+
+
+
+# Best practices in Coding
+
+## Chunk structure
+1. say what you will do (and why)
+2. do it
+3. check that it worked
+4. comment the results
+
+```{r}
+## Example:
+## we create a new variable that contains the results of "weit" expressed in cm
+d.sports$weit.in.cm <- d.sports$weit
+d.sports %>% select(contains("weit")) %>% sample_n(10)
+```
+
+
+## Reproducibility
+- rmarkdown/knitr files
+- checkpoint package
+- git
+
+
+## Coding conventions
+
+Naming Objects:
+- d.xxx for data frame (e.g. d.sports)
+- v.xxx for vectors 
+- t.xxx for temporary objects (e.g. in for loops)
+- lm.xxx for linear models objects
+- mod.xxx for other models (or e.g. svm.xxx for SVMs)
+- mod.sport.1 is usually less complex than mod.sport.2
+- if your current model is e.g. mod.sport.4 and you compute say confidence intervals, name them ci.sport.4
+
+## overwriting
+- y <- log(y) # worse bit of code you can write
+- y.log <- log(y) # much better
+- d.sports.weit.10 or d.sports.short <- d.sports %>% filer(weit >= 10)
+- if adding variable to a data frame overwriting is ok
+- d.sports <- d.sports %>%mutate(weit.in.cm = weit * 100)
+

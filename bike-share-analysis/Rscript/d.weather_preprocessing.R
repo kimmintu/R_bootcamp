@@ -37,13 +37,13 @@ for (col in d.weather){
   print(class(col))
 }
 
+colnames(d.weather)
 d.weather <- d.weather %>%
   mutate(
-    date = dmy(date),
-    weekday = weekdays(date),
+    weekday = weekdays(as.Date(date)),
     minimum_temperature_celsius = farenheit_to_celsius(minimum_temperature),
     maximum_temperature_celsius = farenheit_to_celsius(maximum_temperature),
-    average_temperature_celsis = farenheit_to_celsius(average_temperature),
+    average_temperature_celsius = farenheit_to_celsius(average_temperature),
     precipitation = as.numeric(precipitation),
     snow_fall = as.numeric(snow_fall),
     snow_depth = as.numeric(snow_depth)
@@ -58,13 +58,12 @@ for (col in d.weather){
 describe(d.weather$date)
 
 ###### MERGE WEATHER AND BIKE DATA ######
-d.bike_weather <- base::merge(x=d.bike, y=d.weather, 
-                        by.x=c("startdate"), 
-                        by.y=c("date")
+d.bike_weather <- base::merge(y=d.bike, x=d.weather, 
+                        by.y=c("startdate"), 
+                        by.x=c("date")
                         )
 
-x <- c("28-11-2016", "29-11-2016", "30-11-2016")
-x <- dmy(x)
-x
+colnames(d.bike_weather)
+d.bike_weather$date = as.Date(d.bike_weather$date)
 
 saveRDS(d.bike_weather, file = "./data/d.bike_weather.rds")
