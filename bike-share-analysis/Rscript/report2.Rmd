@@ -1,18 +1,20 @@
 ---
 title: "Assignment R Bootcamp"
 author: "Tu Tran and Andy Gubser"
-date: /today
-output: 
+date: "/today"
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: '4'
   html_document:
-    theme: flatly
-    toc: true
-    toc_depth: 4
-    toc_float: 
-      collapsed: true
-      smooth_scroll: true
-    number_sections: true
     df_print: paged
-
+    number_sections: yes
+    theme: flatly
+    toc: yes
+    toc_depth: 4
+    toc_float:
+      collapsed: yes
+      smooth_scroll: yes
 ---
 
 # Clarify question
@@ -72,11 +74,13 @@ for (p in list.of.packages){
 ## mapping of 33 different weather conditions to 6 different weather types
 sunny  <- c("Fair", "Fair / Windy")
 cloudy <- c("Cloudy", "Mostly Cloudy", "Partly Cloudy", "Mostly Cloudy / Windy", "Haze")
-rainy  <- c("Light Rain", "Light Drizzle", "Rain", "Heavy Rain", "Light Rain / Windy", "Fog", "Light Freezing Drizzle", 
-           "Rain / Windy", "Heavy Rain / Windy", "Haze / Windy", "Light Drizzle / Windy", "T-Storm", "Drizzle and Fog", 
-           "Thunder", "Heavy T-Storm", "Light Rain with Thunder", "Patches of Fog")
+rainy  <- c("Light Rain", "Light Drizzle", "Rain", "Heavy Rain", "Light Rain / Windy", 
+            "Fog", "Light Freezing Drizzle", "Rain / Windy", "Heavy Rain / Windy", 
+            "Haze / Windy", "Light Drizzle / Windy", "T-Storm", "Drizzle and Fog", 
+            "Thunder", "Heavy T-Storm", "Light Rain with Thunder", "Patches of Fog")
 windy  <- c("Partly Cloudy / Windy", "Cloudy / Windy", "Haze / Windy")
-snowy  <- c("Light Snow", "Wintry Mix", "Snow", "Heavy Snow", "Light Snow / Windy", "Snow / Windy", "Heavy Snow / Windy")
+snowy  <- c("Light Snow", "Wintry Mix", "Snow", "Heavy Snow", "Light Snow / Windy", 
+            "Snow / Windy", "Heavy Snow / Windy")
 
 ## holidays in New York City in 2016
 public_holidays <- c("2016-01-01", "2016-01-18", "2016-02-12", "2016-02-15", 
@@ -97,7 +101,7 @@ mph_to_kmh <- function(mph) {
   return (as.numeric(1.61 * mph))
 }
 
-## convert 32 different weather conditions to 5 typical weather types, i.e. sunny, cloudy, rainy, windy, snowy.
+## convert 32 different weather conditions to 5 typical weather types
 ## @param conditions: a vector of weather condition values
 ## @return a vector of weather types corresponding to the weather conditions
 get_weather_type_vector <- function (conditions) {
@@ -153,7 +157,8 @@ data.frame(duration = floor(d.bike$tripduration / 60)) %>%
 ## we consider only trips with duration less than 24 hours
 d.bike <- filter(d.bike, tripduration < 1441) # only use data with rental < 24 hours
 
-# aggreate bike sharing data on hour basis, and only relevant predictos are used for the analysis
+## aggreate bike sharing data on hour basis, and only relevant predictos are 
+## used for the analysis
 d.bike <- d.bike %>% 
   group_by(date, month, weekday, hour) %>%
   summarise(tripduration=sum(tripduration), rental_count=n())
@@ -186,7 +191,8 @@ d.weather$type <- as.factor(d.weather$type)
 d.weather <- subset(d.weather, select=-c(condition))
 
 ## expecting weather data has 8784 hourly records (366 days in 2016 x 24h equals 8784)
-## but there are only 8775 records, there needs to insert and fill missing records with NA
+## but there are only 8775 records, there needs to insert and fill missing records 
+## with NA
 nrow(d.weather)
 
 ## create a full data frame with 24 x 366 records of date and hour
@@ -219,6 +225,10 @@ head(d.weather)
 d.total <- merge(d.bike, d.weather, all.x=TRUE)
 # order by data and hour
 d.total <- d.total[with(d.total, order(date, hour)),]
+d.total$weekday <- factor(d.total$weekday, 
+                          levels = c("Montag", "Dienstag", "Mittwoch", 
+                                     "Donnerstag", "Freitag", "Samstag", "Sonntag"))
+unique(d.total$weekday)
 # reset row index to normal
 rownames(d.total) <- NULL
 
@@ -247,7 +257,8 @@ rentholiday <- d.total %>%
 rentholiday
 
 ## As we can see, the rental in public holidays are different among and the weekdays.
-## Public holiday data can be used for the model fitting if we would like to predict for a different year.
+## Public holiday data can be used for the model fitting if we would like to predict
+## for a different year.
 ## However, only data from 2016 are available for both the analysis and model testing.
 ## Droping the public holiday data would reduce the variance in the model.
 
@@ -285,7 +296,8 @@ As illustrated on the box plot, overall the rental low season is in winter and h
 ```{r}
 
 ggplot(d.total, aes(x=month, y=rental_count, color=month)) +
-  geom_boxplot(data=d.total, aes(group=month))
+  geom_boxplot(data=d.total, aes(group=month)) + 
+  ggtitle("Hourly rental distribution for on months")
 
 ```
 
@@ -298,8 +310,7 @@ With this figure, we can see the highest demands on sunny and cloudy days with i
 d.wtype <- d.total %>% group_by(type, hour) %>%
   summarise(rental = round(mean(rental_count))) %>%
   rename(category = type)
-show_24h_category_statistics_plot(d.wtype, "24h Rental by Weather Type", "W.Type")
-
+show_24h_category_statistics_plot(d.wtype, "24h Rental by Weather Type", "Weather Type")
 
 ```
 
@@ -311,7 +322,8 @@ In general, the usage pattern of the weekdays are stable, but then be strongly i
 ggplot(d.total, aes(x=weekday, y=rental_count)) +
   geom_point() +
   geom_smooth(method="lm") +
-  facet_grid(. ~ type)
+  facet_grid(. ~ type) +
+  ggpubr::rotate_x_text()
 
 ```
 
@@ -344,16 +356,24 @@ pm.fit <- glm(rental_count ~ type + hour, family="poisson", data=d.train)
 # predict model on test data
 pm.pred <- predict(pm.fit, newdata = d.test, type="response")
 # compute MSE
-mean((d.test$rental_count - pm.pred)^2)
-#drop1(lm.fit, test="F")
+pm.mse <- mean((d.test$rental_count - pm.pred)^2)
+cat("Simple Poisson model MSE: ", pm.mse)
+```
+
+Residual Analysis
+```{r}
 # residual
 resid_values <- resid(pm.fit)
-length(resid_values)
-head(resid_values)
+cat("Residual length: ", length(resid_values))
+cat("Residual header: ", head(resid_values))
+
 # residual analysis plots
 par(mfrow=c(2,2))
 plot(pm.fit)
+```
 
+Plotting predicted values with GGPlot
+```{r}
 # ggplot predicted values of hourly rental for different weather types
 p1 <- ggplot(d.test, aes(x=hour, y=pm.pred, color=type)) + 
   geom_point(data=d.test, aes(group=type)) + 
@@ -367,7 +387,8 @@ p2 <- ggplot(d.test, aes(x=hour, y=rental_count, color=type)) +
   scale_color_hue("Weather Type", breaks=levels(d.test$type))
 
 figure <- ggarrange(p1, p2, ncol=2, common.legend = TRUE, legend="bottom")
-annotate_figure(figure, top = text_grob("Hour & Weather on Rental - Simple Poisson Model", size = 14))
+annotate_figure(figure, top=text_grob("Hour & Weather on Rental - Simple Poisson Model", 
+                                        size = 14))
 
 ```
 
@@ -375,25 +396,35 @@ annotate_figure(figure, top = text_grob("Hour & Weather on Rental - Simple Poiss
 
 ```{r}
 # Poisson model with full predictors
-pm.fit <- glm(rental_count ~ . - rental_count - tripduration - dewpoint - date, 
+pm.fit2 <- glm(rental_count ~ . - rental_count - tripduration - date, 
               data=d.train)
-pm.err <- cv.glm(d.train, pm.fit, K=10)$delta[1]
-pm.err
+pm.err <- cv.glm(d.train, pm.fit2, K=10)$delta[1]
+cat("10 K cross-validation error rate on complex Poisson model: ", pm.err)
 
-#summary(lm.fit)
+#summary(lm.fit2)
 # predict model on test data
-pm.pred <- predict(pm.fit, newdata = d.test, type="response")
+pm.pred2 <- predict(pm.fit2, newdata = d.test, type="response")
 # compute MSE
-mean((d.test$rental_count - pm.pred)^2)
-#drop1(lm.fit, test="F")
+pm.mse2 <- mean((d.test$rental_count - pm.pred2)^2)
+cat("Complex Poisson model MSE: ", pm.mse2)
+
+```
+
+Residual Analysis
+```{r}
 # residual
-resid_values <- resid(pm.fit)
-length(resid_values)
-head(resid_values)
+resid_values <- resid(pm.fit2)
+cat("Residual legnth: ", length(resid_values))
+cat("Residual header: ", head(resid_values))
 # residual analysis plots
 par(mfrow=c(2,2))
-plot(pm.fit)
+plot(pm.fit2)
 
+```
+
+
+Plotting predicted values with GGPlot
+```{r}
 # ggplot predicted values of hourly rental for different weather types
 p1 <- ggplot(d.test, aes(x=hour, y=pm.pred, color=type)) + 
   geom_point(data=d.test, aes(group=type)) + 
@@ -407,7 +438,8 @@ p2 <- ggplot(d.test, aes(x=hour, y=rental_count, color=type)) +
   scale_color_hue("Weather Type", breaks=levels(d.test$type))
 
 figure <- ggarrange(p1, p2, ncol=2, common.legend = TRUE, legend="bottom")
-annotate_figure(figure, top = text_grob("Hour & Weather on Rental - Complex Poisson Model", size = 14))
+annotate_figure(figure, top=text_grob("Hour & Weather on Rental - Complex Poisson Model", 
+                                      size = 14))
 
 ```
 
@@ -419,12 +451,12 @@ The histograms below show that the distribution of rental_count is not normal di
 ```{r}
 ## check normal distribution for linear model fitting
 par(mfrow=c(1, 2))
-hist(d.total$rental_count)
-hist(log(d.total$rental_count))
+hist(d.total$rental_count, main = "Rental Count Histogram")
+hist(log(d.total$rental_count), main = "Rental Count Log Histogram")
 
 ```
 
-Fitting linear model
+Fitting the linear model
 ```{r}
 set.seed(1)
 
@@ -436,28 +468,41 @@ for (i in 1:10) {
 }
 
 best.level <- which.min(cv.error.10)
+cat("Index of model with least error rate: ", best.level)
+cat("Cross validation error of 10 different polynominal linear models:\n", cv.error.10)
 
-glm.fit.best <- glm(log(rental_count) ~ type + month + weekday + hour + humidity * dewpoint +
-                   poly(windspeed, degree = best.level) + poly(temperature, degree = best.level), data=d.train)
+glm.fit.best <- glm(log(rental_count) ~ type + month + weekday + hour + 
+                      humidity * dewpoint + 
+                      poly(windspeed, degree = best.level) + 
+                      poly(temperature, degree = best.level),
+                    data=d.train)
 
 # predict model on test data
 glm.pred <- predict(glm.fit.best, newdata = d.test)
 # convert log value to normal value via exponential
 glm.pred <- exp(glm.pred)
 
-
-# optimize predictors
-drop1(glm.fit.best, test="F")
 # compute MSE
-mean((d.test$rental_count - glm.pred)^2)
+glm.mse <- mean((d.test$rental_count - glm.pred)^2)
+cat("GLM polynomial model MSE: ", glm.mse)
+
+```
+
+Residual Analysis
+```{r}
 # residual
 resid_values <- resid(glm.fit.best)
-head(resid_values)
-
+cat("Residual length: ", length(resid_values))
+cat("Residual header: ", head(resid_values))
 # plot
 par(mfrow=c(2,2))
 plot(glm.fit.best)
 
+```
+
+
+Plotting predicted values with GGPlot
+```{r}
 # ggplot predicted values of hourly rental for different weather types
 p1 <- ggplot(d.test, aes(x=hour, y=glm.pred, color=type)) + 
   geom_point(data=d.test, aes(group=type)) + 
@@ -471,7 +516,40 @@ p2 <- ggplot(d.test, aes(x=hour, y=rental_count, color=type)) +
   scale_color_hue("Weather Type", breaks=levels(d.test$type))
 
 figure <- ggarrange(p1, p2, ncol=2, common.legend = TRUE, legend="bottom")
-annotate_figure(figure, top = text_grob("Hour & Weather on Rental - Polynomial Linear Model", size = 14))
+annotate_figure(figure, top = text_grob("Hour & Weather on Rental - Polynomial Linear Model",
+                                        size = 14))
+
+```
+
+## Fitting with Regression Tree - Randomforest
+```{r}
+set.seed(1)
+rf.fit <- randomForest(rental_count ~ . - rental_count - tripduration - date, 
+                       data = d.train, mtry=3, ntree=50, importance=TRUE)
+rf.pred <- predict(rf.fit, d.test)
+rf.mse <- mean((rf.pred - d.test$rental_count)^2)
+cat("Randomforest mode MSE: ", rf.mse)
+importance(rf.fit)
+varImpPlot(rf.fit, main = "Randonforest Feature Importance")
+
+# plot randomforest model fit
+plot(rf.fit, main="Error rate vs. number of tree grown")
+
+# ggplot predicted values of hourly rental for different weather types
+p1 <- ggplot(d.test, aes(x=hour, y=rf.pred, color=type)) + 
+  geom_point(data=d.test, aes(group=type)) + 
+  ggtitle("Prediction values") +
+  scale_color_hue("Weather Type", breaks=levels(d.test$type))
+
+# ggplot true values of hourly rental for different weather types
+p2 <- ggplot(d.test, aes(x=hour, y=rental_count, color=type)) + 
+  geom_point(data=d.test, aes(group=type)) + 
+  ggtitle("Real values") + 
+  scale_color_hue("Weather Type", breaks=levels(d.test$type))
+
+figure <- ggarrange(p1, p2, ncol=2, common.legend = TRUE, legend="bottom")
+annotate_figure(figure, top = text_grob("Hour & Weather on Rental - Randomforest Model",
+                                        size = 14))
 
 
 ```
