@@ -75,11 +75,6 @@ for (p in list.of.packages){
 
 d.bike_weather <- readRDS("./data/d.bike_weather.rds")
 
-colnames(d.bike_weather)
-summary(d.bike_weather)
-dim(d.bike_weather)
-length(d.bike_weather)
-
 ```
 
 
@@ -93,6 +88,281 @@ The weather data set includes 366 observations and the 7 variables maximum, mini
 
 
 # Graphical Analysis
+
+```{r}
+head(d.bike_weather)
+
+head(d.bike_weather %>% filter(startdate == "2016-01-04"))
+
+```
+
+
+
+```{r}
+d.bike_weather$starthour <- hour(d.bike_weather$starttime)
+
+d.bike_weather$weekday <- 
+  factor(d.bike_weather$weekday, 
+         levels = c("Montag", "Dienstag",  "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"))
+
+d.bike_weather <- d.bike_weather %>% drop_na(age)
+
+d.bike_weather$tripduration_min <- round(d.bike_weather$tripduration_min)
+d.bike_weather$average_temperature_celsis <- round(d.bike_weather$average_temperature_celsis)
+d.bike_weather$stophour <- hour(d.bike_weather$stoptime)
+
+sub.d.bike_weather <- select(d.bike_weather, 
+                             -c("tripduration", "starttime", "stoptime", "birth_year", "age_capped", 
+                                "maximum_temperature", "minimum_temperature", "average_temperature", 
+                                "minimum_temperature_celsius", "maximum_temperature_celsius", "usertype")) 
+
+names(sub.d.bike_weather)[names(sub.d.bike_weather) == "tripduration_min"] <- "tripduration"
+
+sub.d.bike_weather %>% Filter(f = is.factor) %>% names
+sub.d.bike_weather$starthour <- factor(sub.d.bike_weather$starthour)
+sub.d.bike_weather$stophour <- factor(sub.d.bike_weather$stophour)
+
+str(sub.d.bike_weather)
+
+```
+
+
+
+```{r}
+
+d.bike_weather %>%
+  group_by(month) %>%
+  summarise(median_reading = median(tripduration)) %>%
+  ggplot(aes(x=month, y=median_reading, group=1)) +
+  geom_line(colour = '#5EB296', size=1) +
+  ggtitle('Median trip duration vs. months') +
+  labs(x='Month', y='Median trip duration')
+
+d.bike_weather %>%
+  group_by(weekday) %>%
+  summarise(median_reading = median(tripduration)) %>%
+  ggplot(aes(x=weekday, y=median_reading, group=1)) +
+  geom_line(colour = '#5EB296', size=1) +
+  ggtitle('Median trip duration vs. weekdays') +
+  labs(x='Weekday', y='Median trip duration')
+
+d.bike_weather %>%
+  group_by(starthour) %>%
+  summarise(median_reading = median(tripduration)) %>%
+  ggplot(aes(x=starthour, y=median_reading, group=1)) +
+  geom_line(colour = '#5EB296', size=1) +
+  ggtitle('Median trip duration vs. start hours') +
+  labs(x='Start Hour', y='Median trip duration')
+
+d.bike_weather %>%
+  group_by(starthour, gender, ) %>%
+  summarise(median_reading = median(tripduration)) %>%
+  ggplot(aes(x=starthour, y=median_reading, group=1)) +
+  geom_line(colour = '#5EB296', size=1) +
+  ggtitle('Median trip duration vs. start hours') +
+  labs(x='Start Hour', y='Median trip duration') +
+  facet_wrap(~ gender, scales="free")
+
+d.bike_weather %>%
+  group_by(average_temperature_celsis) %>%
+  summarise(median_reading = median(tripduration)) %>%
+  ggplot(aes(x=average_temperature_celsis, y=median_reading, group=1)) +
+  geom_line(colour = '#5EB296', size=1) +
+  ggtitle('Median trip duration vs. temperature') +
+  labs(x='Temperature', y='Median trip duration')
+
+```
+
+Linear Regression Model
+
+```{r}
+
+```
+```{r}
+
+holidays <- c("2016-01-01", "2016-01-18", "2016-02-12", "2016-02-15", "2016-05-30",
+              "2016-07-04", "2016-09-05", "2016-10-10", "2016-11-11", "2016-11-24",
+              "2016-12-26")
+
+sub.d.bike_weather$public_holiday <- FALSE
+
+for (day in holidays) {
+  sub.d.bike_weather$public_holiday[sub.d.bike_weather$startdate == day] <- TRUE
+}
+
+```
+
+```{r}
+
+sub.agg <- sub.d.bike_weather %>%
+  select(start_station_id, startdate, weekday, public_holiday, average_temperature_celsis, tripduration) %>%
+  filter(startdate == "2016-01-01") %>%
+  group_by(start_station_id, startdate, weekday, public_holiday, average_temperature_celsis) %>%
+  summarize(sum_tripduration = sum(tripduration, na.rm=TRUE)) %>%
+  arrange(startdate)
+
+
+
+## TODO:
+# 1. remove holidays rows
+# 2. remove start - stop between 2 days rows
+head(sub.d.bike_weather %>% filter(startdate == "2016-01-04"))
+
+rentweekday <- sub.d.bike_weather %>%
+  group_by(weekday) %>%
+  summarise(day_avg_count = round(n() / 52))
+
+rentweekday
+
+rentholiday <- sub.d.bike_weather %>%
+  filter(as.character(startdate) %in% holidays) %>%
+  group_by(startdate) %>%
+  summarise(holiday_count = n())
+  arrange(startdate)
+head(rentholiday)
+
+
+fromstation <- d.bike_weather %>%
+  filter(!weekday %in% c("Samstag", "Sonntag")) %>%
+  group_by(start_station_id) %>%
+  summarise(total = n(), day_avg = total / round(5*366/7)) %>%
+  arrange(desc(total))
+fromstation
+
+max(d.bike_weather$tripduration_min)
+
+dim(d.bike_weather)
+dim(d.bike_weather %>% filter(weekday == "Sonntag" || weekday == "Samstag"))
+
+dim(d.bike_weather %>% filter(weekday %in%  c("Sonntag", "Samstag")))
+
+```
+```{r}
+tostation <- d.bike_weather %>%
+  group_by(end_station_id) %>%
+  summarise(total = n(), day_avg = total / 366) %>%
+  arrange(desc(total))
+tostation
+
+
+```
+
+
+```{r}
+library(ISLR)
+library(tree)
+
+sub.d.bike_weather$tripdurationlog <- log(sub.d.bike_weather$tripduration)
+
+# create train and test sets
+set.seed(1)
+train <- sample(1:nrow(sub.d.bike_weather), nrow(sub.d.bike_weather) / 2)
+d.train <- sub.d.bike_weather[train, ]
+d.test <- sub.d.bike_weather[-train, ]
+
+dim(d.train)
+
+sub.agg <- sub.d.bike_weather %>%
+  select(start_station_id, startdate, weekday, public_holiday, 
+         average_temperature_celsis, tripduration) %>%
+  group_by(start_station_id, startdate, weekday, public_holiday, average_temperature_celsis) %>%
+  summarize(sum_tripduration = sum(tripduration, na.rm=TRUE)) %>%
+  arrange(startdate)
+
+head(sub.agg)
+str(sub.agg)
+
+sub.agg$start_station_id <- as.numeric(sub.agg$start_station_id)
+
+# fitting tree model
+tree.model <- tree(sum_tripduration ~ . - sum_tripduration, data = sub.agg)
+tree.model
+summary(tree.model)
+
+# ploting model
+plot(tree.model)
+text(tree.model)
+
+# predicted error
+yhat <- predict(tree.carseats, newdata = Carseats.test)
+mean((yhat - Carseats.test$Sales)^2)
+
+# cross validation determines optimal level of tree complexity
+cv.carseats <- cv.tree(tree.carseats)
+plot(cv.carseats$size, cv.carseats$dev, type = "b")
+tree.min <- which.min(cv.carseats$dev)
+points(tree.min, cv.carseats$dev[tree.min], col = "red", cex = 2, pch = 20)
+
+# prune tree
+prune.carseats <- prune.tree(tree.carseats, best = 8)
+plot(prune.carseats)
+text(prune.carseats, pretty = 0)
+
+# predicted error of pruned tree
+yhat <- predict(prune.carseats, newdata = Carseats.test)
+mean((yhat - Carseats.test$Sales)^2)
+
+# bagging tree & predicted error
+bag.carseats <- randomForest(Sales ~ ., data = Carseats.train, mtry = 10, ntree = 500, importance = TRUE)
+yhat.bag <- predict(bag.carseats, newdata = Carseats.test)
+mean((yhat.bag - Carseats.test$Sales)^2)
+
+# important predictors
+importance(bag.carseats)
+
+# randomforest & predicted error
+rf.carseats <- randomForest(Sales ~ ., data = Carseats.train, mtry = 3, ntree = 500, importance = TRUE)
+yhat.rf <- predict(rf.carseats, newdata = Carseats.test)
+mean((yhat.rf - Carseats.test$Sales)^2)
+
+# important predictors
+importance(rf.carseats)
+
+
+```
+
+
+
+```{r}
+str(sub.d.bike_weather)
+sub.d.bike_weather$start_station_id <- as.numeric(sub.d.bike_weather$start_station_id)
+
+
+```
+
+
+```{r}
+str(sub.d.bike_weather)
+
+lm.fit <- lm(log(tripduration) ~ weekday + public_holiday 
+             , data=sub.d.bike_weather)
+
+plot(lm.fit)
+
+lm.fit <- lm(log(tripduration) ~ age, data=sub.d.bike_weather)
+
+
+
+summ <- summary(lm.fit)
+
+
+modcoef <- summ[["coefficients"]]
+
+summ
+modcoef
+
+modcoef[ , 4] <- round(modcoef[ , 4], 3)
+modcoef[order(modcoef[0:20 , 4]), ]  
+
+# save the model to disk
+saveRDS(lm.fit, "./data/lm_model_log.rds")
+ 
+# load the model
+#read_model <- readRDS("./data/lm_model.rds")
+#read_summ <- summary(read_model)
+
+
+```
 
 
 ```{r}
