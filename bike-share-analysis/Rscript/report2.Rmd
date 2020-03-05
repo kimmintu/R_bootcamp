@@ -84,7 +84,7 @@ show_24h_category_statistics_plot <- function (d.data, title, category_name) {
   ggplot(d.data, aes(x=hour, y=rental, color=category)) + 
     geom_point(data=d.data, aes(group=category)) + 
     geom_line(data=d.data, aes(group=category)) +
-    ggtitle(title) + 
+    ggtitle(title) + ylab("rentals / hour") + 
     scale_color_hue(category_name, breaks=levels(d.data$category))
 }
 ```
@@ -180,7 +180,7 @@ As illustrated on the box plot, overall the rental low season is in winter and h
 
 ggplot(d.total, aes(x=month, y=rental_count, color=month)) +
   geom_boxplot(data=d.total, aes(group=month)) + 
-  ggtitle("Hourly rental distribution on months")
+  ggtitle("Hourly rental distribution on months") + ylab("rentals / hour")
 
 ```
 
@@ -205,6 +205,7 @@ In general, the usage pattern of the weekdays are stable, but then be strongly i
 ggplot(d.total, aes(x=weekday, y=rental_count)) +
   geom_point() +
   geom_smooth(method="lm") +
+  ylab("rentals / hour") +
   facet_grid(. ~ type) +
   ggpubr::rotate_x_text()
 
@@ -232,30 +233,30 @@ d.split <- sample.split(d.total, SplitRatio = 0.7)
 d.train <- subset(d.total, subset = d.split)
 d.test <- subset(d.total, subset = !d.split)
 
-# Poisson model with full predictors
-pm.fit2 <- glm(rental_count ~ . - rental_count - tripduration - date, 
+# Poisson model with all possible predictors
+pm.fit <- glm(rental_count ~ . - rental_count - tripduration - date, 
               family="poisson", data=d.train)
-#pm.err <- cv.glm(d.train, pm.fit2, K=10)$delta[1]
-#cat("10 K cross-validation error rate on complex Poisson model: ", pm.err)
 
-#summary(lm.fit2)
+#pm.err <- cv.glm(d.train, pm.fit, K=10)$delta[1]
+#cat("10 K cross-validation error rate on Poisson model: ", pm.err)
+
 # predict model on test data
-pm.pred2 <- predict(pm.fit2, newdata = d.test, type="response")
+pm.pred <- predict(pm.fit, newdata = d.test, type="response")
 # compute MSE
-pm.mse2 <- mean((d.test$rental_count - pm.pred2)^2)
-cat("Complex Poisson model MSE: ", pm.mse2)
+pm.mse <- mean((d.test$rental_count - pm.pred)^2)
+cat("Complex Poisson model MSE: ", pm.mse)
 
 ```
 
 Residual Analysis
 ```{r}
 # residual
-resid_values <- resid(pm.fit2)
+resid_values <- resid(pm.fit)
 cat("Residual legnth: ", length(resid_values))
 cat("Residual header: ", head(resid_values))
 # residual analysis plots
 par(mfrow=c(2,2))
-plot(pm.fit2)
+plot(pm.fit)
 
 ```
 
@@ -263,15 +264,15 @@ plot(pm.fit2)
 Plotting predicted values with GGPlot
 ```{r}
 # ggplot predicted values of hourly rental for different weather types
-p1 <- ggplot(d.test, aes(x=hour, y=pm.pred2, color=type)) + 
+p1 <- ggplot(d.test, aes(x=hour, y=pm.pred, color=type)) + 
   geom_point(data=d.test, aes(group=type)) + 
-  ggtitle("Prediction values") + 
+  ggtitle("Prediction values") + ylab("predicted rentals / hour") +
   scale_color_hue("Weather Type", breaks=levels(d.test$type))
 
 # ggplot true values of hourly rental for different weather types
 p2 <- ggplot(d.test, aes(x=hour, y=rental_count, color=type)) + 
   geom_point(data=d.test, aes(group=type)) + 
-  ggtitle("Real values") + 
+  ggtitle("Real values") + ylab("rentals / hour") +
   scale_color_hue("Weather Type", breaks=levels(d.test$type))
 
 figure <- ggarrange(p1, p2, ncol=2, common.legend = TRUE, legend="bottom")
@@ -343,13 +344,13 @@ Plotting predicted values with GGPlot
 # ggplot predicted values of hourly rental for different weather types
 p1 <- ggplot(d.test, aes(x=hour, y=glm.pred, color=type)) + 
   geom_point(data=d.test, aes(group=type)) + 
-  ggtitle("Prediction values") +
+  ggtitle("Prediction values") + ylab("predicted rentals / hour") + 
   scale_color_hue("Weather Type", breaks=levels(d.test$type))
 
 # ggplot true values of hourly rental for different weather types
 p2 <- ggplot(d.test, aes(x=hour, y=rental_count, color=type)) + 
   geom_point(data=d.test, aes(group=type)) + 
-  ggtitle("Real values") + 
+  ggtitle("Real values") + ylab("rentals / hour") +
   scale_color_hue("Weather Type", breaks=levels(d.test$type))
 
 figure <- ggarrange(p1, p2, ncol=2, common.legend = TRUE, legend="bottom")
@@ -375,13 +376,13 @@ plot(rf.fit, main="Error rate vs. number of tree grown")
 # ggplot predicted values of hourly rental for different weather types
 p1 <- ggplot(d.test, aes(x=hour, y=rf.pred, color=type)) + 
   geom_point(data=d.test, aes(group=type)) + 
-  ggtitle("Prediction values") +
+  ggtitle("Prediction values") + ylab("predicted rentals / hour") + 
   scale_color_hue("Weather Type", breaks=levels(d.test$type))
 
 # ggplot true values of hourly rental for different weather types
 p2 <- ggplot(d.test, aes(x=hour, y=rental_count, color=type)) + 
   geom_point(data=d.test, aes(group=type)) + 
-  ggtitle("Real values") + 
+  ggtitle("Real values") + ylab("rentals / hour") + 
   scale_color_hue("Weather Type", breaks=levels(d.test$type))
 
 figure <- ggarrange(p1, p2, ncol=2, common.legend = TRUE, legend="bottom")
@@ -405,7 +406,7 @@ TODO:
 
 ```{r}
 
-cat("Complex Poisson model MSE: ", pm.mse2)
+cat("Poisson model MSE: ", pm.mse)
 cat("Linear Polynomial model MSE: ", glm.mse)
 cat("Randomforest model MSE: ", rf.mse)
 
