@@ -1,7 +1,7 @@
 ---
 title: "Assignment R Bootcamp"
 author: "Tu Tran and Andy Gubser"
-date: "/today"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
   pdf_document:
     toc: yes
@@ -134,10 +134,10 @@ rentholiday <- d.total %>%
   arrange(date)
 rentholiday
 
-## As we can see, the rental in public holidays are different among and the weekdays.
-## Public holiday data can be used for the model fitting if we would like to predict
-## for a different year.
-## However, only data from 2016 are available for both the analysis and model testing.
+## As we can see, the rental in public holidays are different from the weekdays and 
+## among themselves. Public holiday data can be used for the model fitting if we 
+## would like to predict for a different year.
+## However, only data from 2016 are used for both the train and test data sets.
 ## Droping the public holiday data would reduce the variance in the model.
 
 ## remove public holiday dataset
@@ -145,7 +145,7 @@ d.total <- filter(d.total, !as.character(date) %in% public_holidays)
 
 ```
 
-# No more data processing and wrangling, make a copy of the analysis data in a file
+# Make a copy of the analysis data and store in a file
 
 ```{r}
 ## save processed data to file
@@ -156,7 +156,11 @@ saveRDS(d.total, file = "./data/d.total.rds")
 # Exploratory Data Analysis, Graphical Analysis
 
 ## ggplot rentals over 24h for different weekdays
+<<<<<<< HEAD
 The plot shows the usage pattern of shared bikes in New York City. It is clear that there are two different usage patterns for working days and weekend. On working days, we can see two peaks during the rush hours. One is at about 8:00 AM when people go to work and another one is between 5:00 PM and 6:00 PM when they finish work and go back home. During the weekends, people are more relaxing and may take longer sleep. The number of bikes goes slow up hill, reach its top at around 2:00 PM and get smoothly down hill to the end of the day. The least bike usage period are at round 1:00 AM to 5:00 AM, with its mininum at 4:00 AM.
+=======
+The plot shows the usage pattern of shared bikes in New York City. It is clear that there are two different usage patterns, one is the working days and one is the weekend. In the working days, we can see two peaks at the rush hours at about 8:00 AM and from 5:00 PM to 6:00 PM. These are the time people go to work and go home. In the weekend, people are more relaxing and may take longer sleep. During the weekend, the number of rental bikes goes slow up hill, reaches its top at about 57 rentals around 3:00 PM and goes smoothly down hill to the end of the day. The least bike usage period are at round 1:00 AM to 5:00 AM, with its mininum at 4:00 AM.
+>>>>>>> a51208e263698b0db78c57516d5cf9cb37263d7a
 
 ```{r}
 # ggplot 24h by weekday
@@ -169,7 +173,7 @@ show_24h_category_statistics_plot(d.weekday, "24h Rental by Weekday", "Weekday")
 
 
 ## ggplot rentals over 24h for different months
-As illustrated on the box plot, overall the rental low season is in winter and high season in autumn. The lowest months are January and February with a median rental per hour for only about 15. From March to Juni, there is an increasing trend in the rental. July witnesses a small drop, but then going upward to reach its peak in September. At its peak, the trend drops about 10% to 15% over months still January. The rental trend could possibly be explained with the temperature and klimate over the months. When it is colder, there are less rentals. When it is getting warmer, the trend increases. When it is much hotter, e.g. mid-sommer, there is a drop in trend. And people enjoy biking at cool and fair weather the most.
+As illustrated on the box plot, overall, the rental low season is in winter and the high season is in autumn. The lowest months are January and February with a median rental per hour for only about 15. From March to Juni, there is an increasing trend in the rental. July witnesses a small drop, but then going upward to reach its peak in September. At its peak, the trend drops about 10% to 15% over months still January. The rental trend could possibly be explained with the temperature and climate over the months. When it is colder, there are less rentals. When it is getting warmer or cooler, the trend increases. When it is much hotter, e.g. mid-sommer, there is a drop in trend. And people enjoy biking at cool and fair weather the most.
 
 ```{r}
 
@@ -180,7 +184,7 @@ ggplot(d.total, aes(x=month, y=rental_count, color=month)) +
 ```
 
 ## ggplot rentals over 24h for different months
-With this figure, we can see the highest demands on sunny and cloudy days with its peak at 80 rental at 5:00 PM. There is a drop about 10% to 20% in demand when it is windy. The need for bike is dramatically drop more than a half for rainy and snowy weather as compared to a sunny day. Here, we could easily recognize the usage pattern during rush hours as described in the first plot.
+With this figure, we can see the highest demands on sunny and cloudy days with its peak at 80 rental at 8:00 AM or 5:00 PM. There is a drop about 10% to 20% in demand when it is windy. The need for bike is dramatically drop more than a half for rainy and snowy weather as compared to a sunny day. Here, we could again easily recognize the usage pattern during rush hours as described in the first plot.
 
 ```{r}
 
@@ -193,13 +197,12 @@ show_24h_category_statistics_plot(d.wtype, "24h Rental by Weather Type", "Weathe
 ```
 
 ## ggplot for the rental of the weekdays with an influence of the weather factor
-In general, the usage pattern of the weekdays are stable, but then be strongly influenced and changed by the different weather conditions. The cloudy and sunny days has similar pattern. However, snowy, rainy and windy weather have strong impact and affect to change its usage pattern differently.
+In general, the usage pattern of the weekdays are stable, but then be strongly influenced and changed by the different weather conditions. The cloudy and sunny days has similar pattern. However, snowy, rainy and windy weather have strong impact and affect to change its usage pattern noticeably.
 
 ```{r}
 ## the rental of the weekdays with an influence of the weather
 ggplot(d.total, aes(x=weekday, y=rental_count)) +
   geom_point() +
-  geom_smooth(method="lm") +
   ylab("rentals / hour") +
   facet_grid(. ~ type) +
   ggpubr::rotate_x_text()
@@ -207,7 +210,7 @@ ggplot(d.total, aes(x=weekday, y=rental_count)) +
 ```
 
 # ggplot heatmap for correlation analysis between numeric predictors
-The below heatmap shows some strong correlation between several predictors. High correlations can be seen for the pairs of dew point and the temperature, the dew point and the humidity, tripduration and rental_count. Interestingly, there is a moderate correlation between temperature and tripduration, but not for temperature and rental count, even though, tripduration and rental_count are highly correlated. These information are used to decide which predictors will be considered for the model fitting. Predictors for a model should not have high correlation.
+The below heatmap shows some strong correlation between several predictors. High correlations can be seen for the pairs of dew point and the temperature, dew point and humidity, tripduration and rental_count. Interestingly, there is a moderate correlation between temperature and tripduration, but not for temperature and rental count, even though, tripduration and rental_count are highly correlated. These information are used to decide which predictors will be considered for the model fitting. High correlated predictors should not be used together as predictors in a model.
 
 ```{r}
 ## correlation plot
@@ -219,7 +222,7 @@ d.total[,5:10] %>% cor() %>% corrplot(method = 'color', addCoef.col="black")
 We would like to fit different models for predicting the hourly bike rental demand in New York City. In this section, we will apply different machine learning regression models on the data sets. Furthermore, we compare the performances of these different model based on the mean squared error and comment on the outcomes.
 
 ## A simple Poisson model
-As the amount of bike rental the prediction a count data, we will use the Poisson model for this task.
+As the predicted amount of bike rental count data, we will use the Poisson model for the fitting.
 
 ```{r}
 ## split a train and a test set
@@ -232,9 +235,6 @@ d.test <- subset(d.total, subset = !d.split)
 pm.fit <- glm(rental_count ~ . - rental_count - tripduration - date, 
               family="poisson", data=d.train)
 
-#pm.err <- cv.glm(d.train, pm.fit, K=10)$delta[1]
-#cat("10 K cross-validation error rate on Poisson model: ", pm.err)
-
 # predict model on test data
 pm.pred <- predict(pm.fit, newdata = d.test, type="response")
 # compute MSE
@@ -244,11 +244,12 @@ cat("Complex Poisson model MSE: ", pm.mse)
 ```
 
 Residual Analysis
+The residuals vs Fitted figure shows that the smoother red line is on zero. Therefore, we may conclude that the model equation is correct. The Normal Q-Q plot shows the residual standard deviance is normal distribution almost on the diagonal line. We may conclude that the Poisson model is an appropriate choice.
 ```{r}
 # residual
 resid_values <- resid(pm.fit)
-cat("Residual legnth: ", length(resid_values))
-cat("Residual header: ", head(resid_values))
+cat("Residual legnth: ", length(resid_values), "\n")
+cat("Residual header: ", head(resid_values), "\n")
 # residual analysis plots
 par(mfrow=c(2,2))
 plot(pm.fit)
@@ -257,6 +258,7 @@ plot(pm.fit)
 
 
 Plotting predicted values with GGPlot
+The two plots below show how close the predicted values to the real values.
 ```{r}
 # ggplot predicted values of hourly rental for different weather types
 p1 <- ggplot(d.test, aes(x=hour, y=pm.pred, color=type)) + 
@@ -301,8 +303,8 @@ for (i in 1:10) {
 }
 
 best.level <- which.min(cv.error.10)
-cat("Index of model with least error rate: ", best.level)
-cat("Cross validation error of 10 different polynominal linear models:\n", cv.error.10)
+cat("Index of model with least error rate: ", best.level, "\n")
+cat("Cross validation error of different polynominal linear models:\n", cv.error.10, "\n")
 
 glm.fit.best <- glm(log(rental_count) ~ type + month + weekday + hour + 
                       humidity * dewpoint + 
@@ -322,6 +324,7 @@ cat("GLM polynomial model MSE: ", glm.mse)
 ```
 
 Residual Analysis
+The residuals vs Fitted figure shows that the smoother red line is on zero. Therefore, we may conclude that the model equation is correct. With log transformation, the Normal Q-Q plot shows the residual standard deviance is close to normal distribution on the diagonal line.
 ```{r}
 # residual
 resid_values <- resid(glm.fit.best)
@@ -335,6 +338,7 @@ plot(glm.fit.best)
 
 
 Plotting predicted values with GGPlot
+The two plots below show how close the predicted values to the real values.
 ```{r}
 # ggplot predicted values of hourly rental for different weather types
 p1 <- ggplot(d.test, aes(x=hour, y=glm.pred, color=type)) + 
@@ -355,6 +359,8 @@ annotate_figure(figure, top = text_grob("Hour & Weather on Rental - Polynomial L
 ```
 
 ## Fitting with Regression Tree - Randomforest
+
+According to the Feature Importance diagram, while the hour and weekday preditors are the most important for the mean square error of the model, hour is the significant feature for the node purity.
 ```{r}
 set.seed(1)
 rf.fit <- randomForest(rental_count ~ . - rental_count - tripduration - date, 
@@ -364,7 +370,11 @@ rf.mse <- mean((rf.pred - d.test$rental_count)^2)
 cat("Randomforest mode MSE: ", rf.mse)
 importance(rf.fit)
 varImpPlot(rf.fit, main = "Randonforest Feature Importance")
+```
 
+Plotting predicted values with GGPlot
+The two plots below show how close the predicted values to the real values.
+```{r}
 # plot randomforest model fit
 plot(rf.fit, main="Error rate vs. number of tree grown")
 
@@ -390,7 +400,6 @@ annotate_figure(figure, top = text_grob("Hour & Weather on Rental - Randomforest
 
 
 ## A chapter of your choice: Regression Tree Randonforest
-TODO:
 
 ```{r}
 
@@ -399,11 +408,11 @@ TODO:
 
 # Conclusion
 
+As a result, comparing the mean squared error (MSE) of the three above mentioned models, Poisson model is simple and has a moderate MSE of 181.9. Linear polynomial model is  complexer but results in a bit higher MSE of 199.3. This means, the linear polynomial model does not fit very well. Lastly, randomforest model shows the most effective fitting with its smallest MSE of 101.0. Randomforest model is definitely the choice for the fitting of the data sources.
 ```{r}
-
-cat("Poisson model MSE: ", pm.mse)
-cat("Linear Polynomial model MSE: ", glm.mse)
-cat("Randomforest model MSE: ", rf.mse)
+cat("Poisson model MSE: ", pm.mse, "\n")
+cat("Linear Polynomial model MSE: ", glm.mse, "\n")
+cat("Randomforest model MSE: ", rf.mse, "\n")
 
 ```
 
