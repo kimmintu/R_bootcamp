@@ -23,6 +23,7 @@ The project is structured in the following sub-folders.
 ./data/NYC-CitiBike-2016.csv -> this is the bike sharing source data, downloaded from [https://www.kaggle.com/samratp/bikeshare-analysis#NYC-CitiBike-2016.csv]
 ./data/New_York_Weather_Hourly_2016.csv -> this is the weather data source generated via the Python Jupyter Notebook
 ./data/d.bike.rds -> this is the processed bike data generated via running the ./Rscript/process_bike_dataset.R
+./data/d.bike.map.rds -> this is the processed bike data for plot the bike tour in the city by gender
 ./data/d.weather.rds -> this is the processed weather data generated via running the ./Rscript/process_weather_dataset.R
 ./data/d.total.rds -> this is the merged data from the ./data/d.bike.rds and ./data/d.weather.rds, generated via the analysis R Markdown file
 ./output/repord.pdf -> this is the analysis report file is generated from the ./Rscript/report.Rmd R Markdown file

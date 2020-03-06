@@ -1,3 +1,5 @@
+## Author: "Tu Tran and Andy Gubser"
+
 #### PREPROCESSING OF WEATHER DATA ####
 
 # remove all objects loaded and clear memory

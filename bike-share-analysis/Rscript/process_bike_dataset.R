@@ -1,3 +1,5 @@
+## Author: "Tu Tran and Andy Gubser"
+
 #### PREPROCESSING OF BIKESHAREING DATA ####
 
 # remove all objects loaded and clear memory
@@ -52,4 +54,40 @@ d.bike <- d.bike %>%
 head(d.bike)
 
 saveRDS(d.bike, file = "./data/d.bike.rds")
+
+#######################################################
+## Process bike data for ploting on map
+
+colnames(d.bike.raw)
+d.bike.map <- d.bike.raw %>% select(start_station_latitude, start_station_longitude, 
+                                    end_station_latitude, end_station_longitude, 
+                                    usertype, gender, birth_year)
+d.bike.map <- d.bike.map %>% mutate(
+  gender = factor(
+    gender, 
+    levels = c(0,1,2), 
+    labels = c("X", "M", "F")
+  ) ,
+  
+  age = 2016-birth_year)
+
+d.bike.map <- filter(d.bike.map, 
+                 start_station_latitude > 40.6,
+                 end_station_latitude > 40.6
+)
+
+###### FILTER SUBSCRIBERS ######
+d.bike.map <- filter(d.bike.map, usertype == "Subscriber")
+
+###### EXCLUDE UNKNOWN GENDER ######
+summary(d.bike.map$gender)
+d.bike.map <- filter(d.bike.map, 
+                 gender == "F" | gender == "M") %>%
+droplevels()
+
+saveRDS(d.bike.map, file = "./data/d.bike.map.rds")
+
+
+
+
 
