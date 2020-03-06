@@ -17,27 +17,21 @@ output:
       smooth_scroll: yes
 ---
 
-# Clarify question
-
-# get data: d1 <- read_csv(relative path)
-# data prep: saveRDS(d1, "file.RDS")
-# data visualisation: set.seed(19)
-# fit models
-# interpretation
-
-
 # Abstract
 
 # Purpose / Research question
 
-The purpose of this project is to analyse the hourly demand of using bike sharing in New York City in 2016. In particular, we would like to explore the provided bike sharing, weather data and then create different models to predict the hourly demand for sharing bikes. These models will be compared to find one best model with a least prediction error rate.
+The purpose of this project is to analyse the hourly demand for bike sharing in New York City in 2016. In particular, we estimate the demand based on dates and weather data by different models. The best model is evaluated by comparing models on the basis of least prediction error rate.
 
 # Methodology
-The analysis bases on the bike sharing data sets for New York City in 2016 from Kaggle [^1 https://www.kaggle.com/samratp/bikeshare-analysis#NYC-CitiBike-2016.csv]. The weather data is retrieved from the Weather.com API [^2 https://api.weather.com/v1/location/KLGA:9:US/observations/historical.json]. After the data preparation step, we provide an graphical analysis to approach the research question on the usage of shared bikes. Then, we fit a poisson model, high level polynomial linear model followed by a random forest model to deepen our analysis.  
+The analysis bases on the bike sharing data sets for New York City in 2016 from Kaggle [^1 https://www.kaggle.com/samratp/bikeshare-analysis#NYC-CitiBike-2016.csv] and the weather data from the Weather.com API [^2 https://api.weather.com/v1/location/KLGA:9:US/observations/historical.json].
+
+After data preparation, we provide an graphical analysis to approach the research question on the demand for shared bikes. Then, we fit a poisson model, high level polynomial linear model followed by a random forest model to deepen our analysis.  
 
 # Analysis
 
-## R and knitr Setup
+## Data Preparation
+
 ```{r setup}
 # remove all objects loaded and clear memory
 rm(list = ls(all.names = TRUE))
@@ -52,8 +46,6 @@ set.seed(19)
 ```
 
 
-## Library Import
-
 ```{r importLibraries, include=FALSE}
 list.of.packages <- c("installr", "Hmisc", "ggmap", "tidyverse", "tidyr", "corrplot",
                       "viridis", "leaflet", "lubridate", "checkpoint", "zoo", "caTools",
@@ -66,9 +58,7 @@ for (p in list.of.packages){
 
 ```
 
-# User Defined Functions and Constants
-
-```{r}
+```{r user-functions}
 ## user defined functions and constants ##
 
 ## mapping of 33 different weather conditions to 6 different weather types
@@ -127,7 +117,7 @@ show_24h_category_statistics_plot <- function (d.data, title, category_name) {
 }
 ```
 
-# Process bike sharing data
+
 The bike data set consists of 276'798 observation and 15 variables. These variables include the two categories user type and gender as well as the numeric birth year. User type defines if the user is a registered subscriber of the bike sharing service or a casual user. Gender says if the user is female, male or unknown. The continous variable age is calculated from the birth year. Further, the categorical variable age_cor is created, where users over 70 are put into a single bin in order to reduce potential bias of these observations. 
 Further, the data set include start and stop time stamps as well as trip duration of individual trips, station names, ids and its coordinates. By checking for outliers, one observation was detected to have meaningless coordinates. These observations are excluded from further analysis. The prepared data set includes 242'746 observations and 21 variables. 
 
