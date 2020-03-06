@@ -85,9 +85,11 @@ d.weather$type <- as.factor(d.weather$type)
 ## remove unused column weather condition
 d.weather <- subset(d.weather, select=-c(condition))
 
+## there are 5 NA in the windspeed
+colSums(is.na(d.weather))
+
 ## expecting weather data has 8784 hourly records (366 days in 2016 x 24h equals 8784)
-## but there are only 8775 records, there needs to insert and fill missing records 
-## with NA
+## but there are only 8775 records, there needs to insert and fill missing records with NA
 nrow(d.weather)
 
 ## create a full data frame with 24 x 366 records of date and hour
@@ -100,11 +102,17 @@ rownames(full) <- NULL
 
 ## merge weather data frame (less records) with full data frame (full records)
 d.weather <- merge(full, d.weather, all = TRUE)
-## check NA values after merge
+
+## check NA values after merge, the new records are added with NA
 colSums(is.na(d.weather))
+## check which records with NA
+d.weather %>% filter(is.na(windspeed)) %>% select(date, hour)
+
+## as the NA are spreading with the date and hour, we can use the previous available measured weather
 ## using 'zoo' library to fill the missing NA data with the previous available data
 d.weather <- na.locf(d.weather)
-## check if all NA are filled
+
+## check NA again, we see that all NA are now filled
 colSums(is.na(d.weather))
 head(d.weather)
 

@@ -35,13 +35,14 @@ d.bike <- d.bike.raw %>%
          tripduration = round(tripduration/60) #second to minute
   )
 
-## This plot shows number of trips in minute durations grouped in hour durations
-## The plot shows trips longer than 24 hours are less than 5 rentals
-data.frame(duration = floor(d.bike$tripduration / 60)) %>% 
-  group_by(duration) %>% summarise(count = n()) %>% filter(count > 5) %>% plot()
+## there is no NA in the dataset
+colSums(is.na(d.bike))
 
-## we consider only trips with duration less than 24 hours
-d.bike <- filter(d.bike, tripduration < 1441) # only use data with rental < 24 hours
+## This data frame shows the number of bike rentals grouped in hourly trip duration
+## The values show high confidence for using the data, there is no considerable anormaly
+data.frame(trip_duration_in_hour = floor(d.bike$tripduration / 60), rental_count = d.bike$rental_count) %>% 
+  group_by(trip_duration_in_hour) %>% summarise(rental_count = sum(rental_count)) %>% 
+  arrange(desc(trip_duration_in_hour))
 
 ## aggreate bike sharing data on hour basis, and only relevant predictos are 
 ## used for the analysis
