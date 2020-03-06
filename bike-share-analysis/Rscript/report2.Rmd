@@ -449,7 +449,7 @@ ggmap(mad_map) +
        )
      )+
  labs(x="",y="") +
- facet_grid(month ~ gender) +
+ facet_grid(. ~ gender) +
  theme(
    axis.title.x=element_blank(),
    axis.text.x=element_blank(),
