@@ -406,6 +406,64 @@ annotate_figure(figure, top = text_grob("Hour & Weather on Rental - Randomforest
 
 ```
 
+
+## GGMAP
+
+
+
+
+
+```{r, include=FALSE, echo=FALSE}
+d.total2 <- readRDS("./data/d.bike_weather.rds")
+
+# get background map
+min_lon <- min(d.total2$start_station_longitude, d.total2$end_station_longitude)
+max_lon <- max(d.total2$start_station_longitude, d.total2$end_station_longitude)
+min_lat <- min(d.total2$start_station_latitude, d.total2$end_station_latitude)
+max_lat <- max(d.total2$start_station_latitude, d.total2$end_station_latitude)
+
+mad_map <- (map <- get_map(c(left = min_lon, bottom = min_lat, 
+                             right = max_lon, top = max_lat)))
+
+# take a random sample of size 1%
+d.total2.sample = d.total2[
+  base::sample(x=1:nrow(d.total2), round(nrow(d.total2)*1/100)), ]
+
+
+```
+
+
+
+```{r}
+ggmap(mad_map) +
+ geom_leg(
+   data=d.total2.sample,
+     # color = factor(gender),
+     alpha=0.1,
+     aes(
+       color = age,
+       x = start_station_longitude,
+       y = start_station_latitude,
+       xend = end_station_longitude,
+       yend = end_station_latitude
+       )
+     )+
+ labs(x="",y="") +
+ facet_grid(month ~ gender) +
+ theme(
+   axis.title.x=element_blank(),
+   axis.text.x=element_blank(),
+   axis.ticks.x=element_blank(),
+   axis.title.y=element_blank(),
+   axis.text.y=element_blank(),
+   axis.ticks.y=element_blank()
+   ) +
+ scale_color_viridis(option = "magma")
+
+ggsave("map_age_gender_month.pdf", device = "pdf")
+```
+
+
 # Conclusion
 
 As a result, comparing the mean squared error (MSE) of the three above mentioned models, Poisson model is simple and has a moderate MSE of 181.9. Linear polynomial model is  complexer but results in a bit higher MSE of 199.3. This means, the linear polynomial model does not fit very well. Lastly, randomforest model shows the most effective fitting with its smallest MSE of 101.0. Randomforest model is definitely the choice for the fitting of the data sources.
