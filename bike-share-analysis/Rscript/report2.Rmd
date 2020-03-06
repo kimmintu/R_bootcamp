@@ -1,7 +1,7 @@
 ---
 title: "Assignment R Bootcamp"
 author: "Tu Tran and Andy Gubser"
-date: "`r format(Sys.time(), '%d %B, %Y')`"
+date: "06 March 2020"
 output:
   pdf_document:
     toc: yes
@@ -105,8 +105,8 @@ d.total <- merge(d.bike, d.weather, all.x=TRUE)
 # order by data and hour
 d.total <- d.total[with(d.total, order(date, hour)),]
 d.total$weekday <- factor(d.total$weekday, 
-                          levels = c("Monday", "Tuesday", "Wednesday", 
-                                     "Thursday", "Friday", "Saturday", "Sunday"))
+                          levels = c("Montag", "Dienstag", "Mittwoch", 
+                                     "Donnerstag", "Freitag", "Samstag", "Sonntag"))
 # reset row index to normal
 rownames(d.total) <- NULL
 
@@ -156,17 +156,14 @@ saveRDS(d.total, file = "./data/d.total.rds")
 # Exploratory Data Analysis, Graphical Analysis
 
 ## ggplot rentals over 24h for different weekdays
-<<<<<<< HEAD
 The plot shows the usage pattern of shared bikes in New York City. It is clear that there are two different usage patterns for working days and weekend. On working days, we can see two peaks during the rush hours. One is at about 8:00 AM when people go to work and another one is between 5:00 PM and 6:00 PM when they finish work and go back home. During the weekends, people are more relaxing and may take longer sleep. The number of bikes goes slow up hill, reach its top at around 2:00 PM and get smoothly down hill to the end of the day. The least bike usage period are at round 1:00 AM to 5:00 AM, with its mininum at 4:00 AM.
-=======
-The plot shows the usage pattern of shared bikes in New York City. It is clear that there are two different usage patterns, one is the working days and one is the weekend. In the working days, we can see two peaks at the rush hours at about 8:00 AM and from 5:00 PM to 6:00 PM. These are the time people go to work and go home. In the weekend, people are more relaxing and may take longer sleep. During the weekend, the number of rental bikes goes slow up hill, reaches its top at about 57 rentals around 3:00 PM and goes smoothly down hill to the end of the day. The least bike usage period are at round 1:00 AM to 5:00 AM, with its mininum at 4:00 AM.
->>>>>>> a51208e263698b0db78c57516d5cf9cb37263d7a
 
 ```{r}
 # ggplot 24h by weekday
 d.weekday <- d.total %>% group_by(weekday, hour) %>% 
   summarise(rental = round(mean(rental_count))) %>%
   rename(category = weekday)
+
 show_24h_category_statistics_plot(d.weekday, "24h Rental by Weekday", "Weekday")
 
 ```
