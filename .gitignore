@@ -3,8 +3,5 @@
 .RData
 .Ruserdata
 
-#ignore generated files .rds
-*.rds
-
 #ignore output directory
 ./bike-share-analysis/output/
